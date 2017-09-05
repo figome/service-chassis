@@ -1,234 +1,208 @@
-import { assert } from 'chai'
-import { Endpoint } from '../src/endpoint'
-import MemoryPlugin from '../src/memory-plugin'
+import { assert } from 'chai';
+import { Endpoint } from '../src/endpoint';
+import MemoryPlugin from '../src/memory-plugin';
 
 describe('Endpoint', () => {
-    
     describe('connect', () => {
 
         it('Can connect', done => {
 
             const plugin = new MemoryPlugin();
-            const instanceLeft = new Endpoint(plugin)
-            const instanceRight = new Endpoint(plugin)
+            const instanceLeft = new Endpoint(plugin);
+            const instanceRight = new Endpoint(plugin);
 
             instanceLeft.connect({ channelName: 'channelName' }, endpoint => {
-                
-                assert.isNull(endpoint)
-                
-                instanceRight.listen({ channelName: 'channelName' }, endpoint => {
+                assert.isNull(endpoint);
+                instanceRight.listen({ channelName: 'channelName' }, leftListenEndpoint => {
 
-                    assert.isNotNull(endpoint, 'instanceRight listen')
+                    assert.isNotNull(leftListenEndpoint, 'instanceRight listen');
 
-                    instanceLeft.connect({ channelName: 'channelName' }, endpoint => {
+                    instanceLeft.connect({ channelName: 'channelName' }, leftConnectEndpoint => {
 
-                        assert.isNotNull(endpoint, `InstanceLeft connect ${endpoint}`)
+                        assert.isNotNull(leftConnectEndpoint, `InstanceLeft connect ${endpoint}`);
 
-                        instanceRight.close(endpoint => {
+                        instanceRight.close(rightCloseEndpoint => {
 
-                            assert.isNotNull(endpoint, 'InstanceRight close')
+                            assert.isNotNull(rightCloseEndpoint, 'InstanceRight close');
 
-                            instanceLeft.close(endpoint => {
+                            instanceLeft.close(leftCloseEndpoint => {
 
-                                assert.isNotNull(endpoint, 'InstanceLeft close')
+                                assert.isNotNull(leftCloseEndpoint, 'InstanceLeft close');
 
-                                done()
+                                done();
 
-                            })
-                    })
-
-                    })
-                })
-
-            })
-            
-        })
+                            });
+                        });
+                    });
+                });
+            });
+        });
 
         it('can close connections', done => {
 
-            const plugin = new MemoryPlugin()
-            const instance = new Endpoint(plugin)
+            const plugin = new MemoryPlugin();
+            const instance = new Endpoint(plugin);
 
             instance.close(endpoint => {
 
                 assert.isNull(endpoint);
 
-                instance.listen({ channelName: 'channelName' }, endpoint => {
+                instance.listen({ channelName: 'channelName' }, listenEndpoint => {
 
-                    instance.close(endpoint => {
+                    assert.isNotNull(listenEndpoint);
 
-                        assert.isNotNull(endpoint)
+                    instance.close(closeEndpoint => {
 
-                        instance.close(endpoint => {
+                        assert.isNotNull(closeEndpoint);
 
-                            assert.isNull(endpoint)
+                        instance.close(secondCloseEndpoint => {
 
-                            done()
+                            assert.isNull(secondCloseEndpoint);
 
-                        })
-                    })
-                })
-            })
+                            done();
 
-        })
-    })
+                        });
+                    });
+                });
+            });
+        });
+    });
 
     describe('double Connect/listen', () => {
-
-        function test(f1:string, f2:string, cb:any) {
-
-            const plugin = new MemoryPlugin()
-            const instance = new Endpoint(plugin)
-            const yolo = instance as any;
-
-            yolo[f1]({ channelName: 'channelName' }, (endpoint: Endpoint) => {
-
-                assert.isNotNull(endpoint)
-
-                yolo[f2]({ channelName: 'channelName' }, (endpoint: Endpoint) => {
-
-                    assert.isNull(endpoint)
-
-                    instance.close(cb)
-
-                })
-
-            })
-        }
-
         it('listen:listen', done => {
 
-            const plugin = new MemoryPlugin()
-            const instance = new Endpoint(plugin)
+            const plugin = new MemoryPlugin();
+            const instance = new Endpoint(plugin);
 
-            instance.listen({ channelName: 'channelName' }, (endpoint: Endpoint) => {
+            instance.listen({ channelName: 'channelName' }, listenEndpoint => {
 
-                assert.isNotNull(endpoint)
+                assert.isNotNull(listenEndpoint);
 
-                instance.listen({ channelName: 'channelName' }, (endpoint: Endpoint) => {
+                instance.listen({ channelName: 'channelName' }, secondListenEndpoint => {
 
-                    assert.isNull(endpoint)
+                    assert.isNull(secondListenEndpoint);
 
-                    instance.close(endpoint => {
+                    instance.close(closeEndpoint => {
 
-                        assert.isNotNull(endpoint)
+                        assert.isNotNull(closeEndpoint);
 
-                        done()
-                    })
+                        done();
+                    });
 
-                })
+                });
 
-            })
-        })
+            });
+        });
 
         it('listen:connect', done => {
-            
-            const plugin = new MemoryPlugin()
-            const instance = new Endpoint(plugin)
 
-            instance.listen({ channelName: 'channelName' }, (endpoint: Endpoint) => {
-                
-                assert.isNotNull(endpoint)
+            const plugin = new MemoryPlugin();
+            const instance = new Endpoint(plugin);
 
-                instance.connect({ channelName: 'channelName' }, (endpoint: Endpoint) => {
-                    assert.isNull(endpoint)
+            instance.listen({ channelName: 'channelName' }, listenEndpoint => {
 
-                    instance.close(endpoint => {
+                assert.isNotNull(listenEndpoint);
 
-                        assert.isNotNull(endpoint)
+                instance.connect({ channelName: 'channelName' }, connectEndpoint => {
 
-                        done()
-                    })
+                    assert.isNull(connectEndpoint);
 
-                })
+                    instance.close(closeEndpoint => {
 
-            })
-        })
+                        assert.isNotNull(closeEndpoint);
+
+                        done();
+                    });
+
+                });
+
+            });
+        });
 
         it('connect:listen', done => {
-            
-            const plugin = new MemoryPlugin()
-            const instance = new Endpoint(plugin)
 
-            instance.connect({ channelName: 'channelName' }, (endpoint: Endpoint) => {
+            const plugin = new MemoryPlugin();
+            const instance = new Endpoint(plugin);
 
-                assert.isNull(endpoint, 'instance connect')
+            instance.connect({ channelName: 'channelName' }, connectEndpoint => {
 
-                instance.listen({ channelName: 'channelName' }, (endpoint: Endpoint) => {
+                assert.isNull(connectEndpoint, 'instance connect');
 
-                    assert.isNotNull(endpoint, 'instance listen after connect')
+                instance.listen({ channelName: 'channelName' }, listenEndpoint => {
 
-                    instance.close(endpoint => {
+                    assert.isNotNull(listenEndpoint, 'instance listen after connect');
 
-                        assert.isNotNull(endpoint)
+                    instance.close(closeEndpoint => {
 
-                        done()
-                    })
+                        assert.isNotNull(closeEndpoint);
 
-                })
+                        done();
+                    });
 
-            })
-        })
+                });
+
+            });
+        });
 
         it('connect:connect', done => {
-            
-            const plugin = new MemoryPlugin()
-            const instance = new Endpoint(plugin)
 
-            instance.connect({ channelName: 'channelName' }, (endpoint: Endpoint) => {
+            const plugin = new MemoryPlugin();
+            const instance = new Endpoint(plugin);
 
-                assert.isNull(endpoint, 'instance connect')
+            instance.connect({ channelName: 'channelName' }, connectEndpoint => {
 
-                instance.connect({ channelName: 'channelName' }, (endpoint: Endpoint) => {
+                assert.isNull(connectEndpoint, 'instance connect');
 
-                    assert.isNull(endpoint, 'instance listen after connect')
+                instance.connect({ channelName: 'channelName' }, secondConnectEndpoint => {
 
-                    done()
+                    assert.isNull(secondConnectEndpoint, 'instance listen after connect');
 
-                })
+                    done();
 
-            })
-        })
+                });
 
-    })
+            });
+        });
+
+    });
 
     describe('send/bind', () => {
 
         it('cannot send if not connected.', done => {
 
-            const plugin = new MemoryPlugin()
-            const instance = new Endpoint(plugin)
+            const plugin = new MemoryPlugin();
+            const instance = new Endpoint(plugin);
 
             instance.send('TEST', endpoint => {
 
-                assert.isNull(endpoint)
-                done()
+                assert.isNull(endpoint);
+                done();
 
-            })
+            });
 
-        })
+        });
 
         it('can send if connected.', done => {
 
-            const plugin = new MemoryPlugin()
-            const server = new Endpoint(plugin)
+            const plugin = new MemoryPlugin();
+            const server = new Endpoint(plugin);
 
             server.listen({ channelName: 'channelName' }, endpoint => {
 
-                server.send('TEST', endpoint => {
+                server.send('TEST', sendEndpoint => {
 
-                    assert.isNull(endpoint)
+                    assert.isNull(sendEndpoint);
 
-                    server.close(endpoint => {
+                    server.close(closeEndpoint => {
 
-                        assert.isNotNull(endpoint)
-                        done()
+                        assert.isNotNull(closeEndpoint);
+                        done();
 
-                    })
+                    });
 
-                })
-            })
-        })
+                });
+            });
+        });
 
         it('can send to client and receive call back.', done => {
 
@@ -238,50 +212,48 @@ describe('Endpoint', () => {
 
             server.listen({ channelName: 'server' }, endpoint => {
 
-                assert.isNotNull(endpoint)
+                assert.isNotNull(endpoint);
 
-                client.connect({ channelName: 'server' }, endpoint => {
+                client.connect({ channelName: 'server' }, connectEndpoint => {
 
-                    assert.isNotNull(endpoint)
+                    assert.isNotNull(connectEndpoint);
 
                     client.bind(msg => {
 
-                        assert.equal(msg, 'TEST')
+                        assert.equal(msg, 'TEST');
 
-                        client.send('GOTCHA', endpoint => {
+                        client.send('GOTCHA', sendEndpoint => {
 
-                            assert.isNotNull(endpoint)
+                            assert.isNotNull(sendEndpoint);
 
-                        })
+                        });
 
-                    })
+                    });
 
                     server.bind( msg => {
 
-                        assert.equal(msg, 'GOTCHA')
+                        assert.equal(msg, 'GOTCHA');
 
-                        server.close(endpoint => {
+                        server.close(servercloseEndpoint => {
 
-                            assert.isNotNull(endpoint, 'server close')
+                            assert.isNotNull(servercloseEndpoint, 'server close');
 
-                            client.close (endpoint => {
+                            client.close (clientCloseEndpoint => {
 
-                                assert.isNotNull(endpoint, 'client close')
-                                done()
-                                
-                            })
-                        })
-                    })
+                                assert.isNotNull(clientCloseEndpoint, 'client close');
+                                done();
+                            });
+                        });
+                    });
 
-                    server.send('TEST', endpoint => {
+                    server.send('TEST', serverSendEndpoint => {
 
-                        assert.isNotNull(endpoint)
+                        assert.isNotNull(serverSendEndpoint);
 
-                    })
-                })
-            })
+                    });
+                });
+            });
 
-        })
-    })
-})
-
+        });
+    });
+});

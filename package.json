@@ -2,7 +2,7 @@
   "name": "service-chassis",
   "version": "0.1.0",
   "description": "",
-  "main": "dist/endpoint.js",
+  "main": "dist/src/endpoint.js",
   "engines": {
     "node": ">=6.11.2"
   },
@@ -20,6 +20,9 @@
     "postversion": "git push && git push --tags",
     "prepublish": "not-in-install && npm run build || echo 'In install cycle, skipping prepublish'"
   },
+  "contributors": [
+    "Robert Docter <rd@figo.io>"
+  ],
   "repository": {
     "type": "git",
     "url": "figome/service-chassis"

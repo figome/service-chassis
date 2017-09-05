@@ -1,59 +1,63 @@
-import { Plugin, Endpoint, Param, Callback } from './endpoint'
+import { Plugin, Endpoint, Callback } from './endpoint';
 
-export class MemoryPlugin implements Plugin {
-    
-    private serviceMap:Map<string, Endpoint[]>
+export interface Param {
+    channelName: string;
+}
+
+export class MemoryPlugin implements Plugin<Param> {
+
+    private serviceMap: Map<string, Endpoint<Param>[]>;
 
     constructor() {
 
-        this.serviceMap = new Map<string, Endpoint[]>()
+        this.serviceMap = new Map<string, Endpoint<Param>[]>();
 
     }
 
-    public listen(param: Param, endpoint: Endpoint, cb: Callback) {
-        if(this.serviceMap.has(param.channelName)) {
-            cb(null)
-            return
+    public listen(param: Param, endpoint: Endpoint<Param>, cb: Callback<Param>): void {
+        if (this.serviceMap.has(param.channelName)) {
+            cb(null);
+            return;
         }
-        this.serviceMap.set(param.channelName, [endpoint])
-        cb(endpoint)
+        this.serviceMap.set(param.channelName, [endpoint]);
+        cb(endpoint);
 
     }
 
-    public connect(param:Param, endpoint:Endpoint, cb: Callback) {
-        const map = this.serviceMap.get(param.channelName)
+    public connect(param: Param, endpoint: Endpoint<Param>, cb: Callback<Param>): void {
+        const map = this.serviceMap.get(param.channelName);
         if (!map) {
-            cb(null)
-            return
+            cb(null);
+            return;
         }
         if (map.length != 1) {
-            cb(null)
-            return
+            cb(null);
+            return;
         }
         map.push(endpoint);
-        cb(endpoint)
+        cb(endpoint);
 
     }
 
-    public close(param:Param, endpoint:Endpoint, cb: Callback) {
+    public close(param: Param, endpoint: Endpoint<Param>, cb: Callback<Param>): void {
 
-        this.serviceMap.delete(param.channelName)
-        cb(endpoint)
+        this.serviceMap.delete(param.channelName);
+        cb(endpoint);
 
     }
 
-    public send(data:any, param:Param, endpoint:Endpoint, cb: Callback) {
+    public send(data: any, param: Param, endpoint: Endpoint<Param>, cb: Callback<Param>): void {
 
-        const endpointToSendTo = this.serviceMap.get(param.channelName).find((i) => endpoint !== i)
+        const endpointToSendTo = this.serviceMap.get(param.channelName).find((i) => endpoint !== i);
 
-        if(!endpointToSendTo) {
-            cb(null)
-            return
+        if (!endpointToSendTo) {
+            cb(null);
+            return;
         }
 
-        endpointToSendTo.bounded.forEach( bound => bound(data) )
+        endpointToSendTo.bounded.forEach( bound => bound(data) );
 
-        cb(endpoint)
+        cb(endpoint);
 
     }
 }
