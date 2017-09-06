@@ -1,2 +1,3 @@
-# pool-dings
-Pool Dings
+# service-chassis
+Wrapper for service plugins
+
