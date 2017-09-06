@@ -1,4 +1,4 @@
-import { Plugin, Endpoint, Callback } from './endpoint';
+import ServiceChassis, { Plugin, Callback } from '../endpoint';
 import * as stream from 'stream';
 import { spawn, ChildProcess } from 'child_process';
 
@@ -7,7 +7,7 @@ export interface Param {
     argv: string[];
 }
 
-export class ExecPlugin implements Plugin<Param> {
+export class ExecPlugin extends Plugin<Param> {
 
     private toSubProcess: stream.Writable;
     private fromSubProcess: stream.Readable;
@@ -15,12 +15,13 @@ export class ExecPlugin implements Plugin<Param> {
     private killTimeout: number;
 
     constructor(waitBeforeKill = 500) {
+        super();
         this.killTimeout = waitBeforeKill;
     }
 
-    public listen(param: Param, endpoint: Endpoint<Param>, cb: Callback<Param>): void {/**/}
+    public listen(param: Param, endpoint: ServiceChassis<Param>, cb: Callback<Param>): void {/**/}
 
-    public connect(param: Param, endpoint: Endpoint<Param>, cb: Callback<Param>): void {
+    public connect(param: Param, endpoint: ServiceChassis<Param>, cb: Callback<Param>): void {
 
         const subProcess = spawn(param.command, param.argv);
 
@@ -39,9 +40,10 @@ export class ExecPlugin implements Plugin<Param> {
             endpoint.bounded.forEach( bound => bound(data));
         });
 
+        cb(endpoint);
     }
 
-    public close(param: Param, endpoint: Endpoint<Param>, cb: Callback<Param>): void {
+    public close(param: Param, endpoint: ServiceChassis<Param>, cb: Callback<Param>): void {
 
         this.toSubProcess.end(() => {
             setTimeout(() => {
@@ -54,7 +56,7 @@ export class ExecPlugin implements Plugin<Param> {
 
     }
 
-    public send(data: any, param: Param, endpoint: Endpoint<Param>, cb: Callback<Param>): void {
+    public write(data: any, param: Param, endpoint: ServiceChassis<Param>, cb: Callback<Param>): void {
 
         this.toSubProcess.write(data, () => {
             cb(endpoint);

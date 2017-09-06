@@ -1,20 +1,20 @@
-import { Plugin, Endpoint, Callback } from './endpoint';
+import ServiceChassis, { Plugin, Callback, ReadCallback } from '../endpoint';
 
 export interface Param {
     channelName: string;
 }
 
-export class MemoryPlugin implements Plugin<Param> {
+export class MemoryPlugin extends Plugin<Param> {
 
-    private serviceMap: Map<string, Endpoint<Param>[]>;
+    private serviceMap: Map<string, ServiceChassis<Param>[]>;
 
     constructor() {
-
-        this.serviceMap = new Map<string, Endpoint<Param>[]>();
+        super();
+        this.serviceMap = new Map<string, ServiceChassis<Param>[]>();
 
     }
 
-    public listen(param: Param, endpoint: Endpoint<Param>, cb: Callback<Param>): void {
+    public listen(param: Param, endpoint: ServiceChassis<Param>, cb: Callback<Param>): void {
         if (this.serviceMap.has(param.channelName)) {
             cb(null);
             return;
@@ -24,7 +24,7 @@ export class MemoryPlugin implements Plugin<Param> {
 
     }
 
-    public connect(param: Param, endpoint: Endpoint<Param>, cb: Callback<Param>): void {
+    public connect(param: Param, endpoint: ServiceChassis<Param>, cb: Callback<Param>): void {
         const map = this.serviceMap.get(param.channelName);
         if (!map) {
             cb(null);
@@ -39,14 +39,14 @@ export class MemoryPlugin implements Plugin<Param> {
 
     }
 
-    public close(param: Param, endpoint: Endpoint<Param>, cb: Callback<Param>): void {
+    public close(param: Param, endpoint: ServiceChassis<Param>, cb: Callback<Param>): void {
 
         this.serviceMap.delete(param.channelName);
         cb(endpoint);
 
     }
 
-    public send(data: any, param: Param, endpoint: Endpoint<Param>, cb: Callback<Param>): void {
+    public write(data: any, param: Param, endpoint: ServiceChassis<Param>, cb: Callback<Param>): void {
 
         const endpointToSendTo = this.serviceMap.get(param.channelName).find((i) => endpoint !== i);
 

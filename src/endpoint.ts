@@ -1,23 +1,32 @@
-
+/*
+ * INTERFACES
+ */
 export interface Callback<P> {
-    (endpoint?: Endpoint<P>): void;
+    (endpoint?: ServiceChassis<P>): void;
 }
 
+export interface ReadCallback<P> {
+    (data: any, endpoint: ServiceChassis<P>): void;
+}
 
 export interface BindCallback {
     (data: any, status?: number, signal?: string): void;
-
-}
-export interface Plugin<P> {
-
-    listen(param: P, endpoint: Endpoint<P>, cb: Callback<P>): void;
-    connect(param: P, endpoint: Endpoint<P>, cb: Callback<P>): void;
-    close(param: P, endpoint: Endpoint<P>, cb: Callback<P>): void;
-    send(data: any, param: P, endpoint: Endpoint<P>, cb: Callback<P>): void;
-
 }
 
-export class Endpoint<P> {
+export abstract class Plugin<P> {
+    public abstract listen(param: P, endpoint: ServiceChassis<P>, cb: Callback<P>): void;
+    public abstract connect(param: P, endpoint: ServiceChassis<P>, cb: Callback<P>): void;
+    public abstract close(param: P, endpoint: ServiceChassis<P>, cb: Callback<P>): void;
+    public read(data: any, endpoint: ServiceChassis<P>, cb: ReadCallback<P>): void {
+        cb(data, endpoint);
+    }
+    public abstract write(data: any, param: P, endpoint: ServiceChassis<P>, cb: Callback<P>): void;
+}
+
+/*
+ * SERVICE CHASSIS
+ */
+export default class ServiceChassis<P> {
 
     private plugin: Plugin<P>;
     private connectionParams: P;
@@ -30,7 +39,7 @@ export class Endpoint<P> {
         this.boundedError = [];
     }
 
-    public listen(param: P, cb: Callback<P>) {
+    public listen(param: P, cb: Callback<P>): void {
 
         if (this.connectionParams) {
             cb(null);
@@ -42,15 +51,7 @@ export class Endpoint<P> {
 
     }
 
-    public bind(cb: BindCallback, errCb: (data: any) => void = null) {
-        if (errCb) {
-          this.boundedError.push(errCb);
-        }
-        this.bounded.push(cb);
-
-    }
-
-    public connect(param: P, cb: Callback<P>) {
+    public connect(param: P, cb: Callback<P>): void {
 
         if (this.connectionParams) {
             cb(null);
@@ -64,34 +65,41 @@ export class Endpoint<P> {
             }
 
             cb(endpoint);
-        })
+        });
 
     }
 
-    public close(cb: Callback<P>) {
+    public close(cb: Callback<P>): void {
 
-        if(!this.connectionParams) {
-            cb(null)
-            return
+        if (!this.connectionParams) {
+            cb(null);
+            return;
         }
 
         this.plugin.close(this.connectionParams, this, endpoint => {
 
-            endpoint.connectionParams = null
-            cb(endpoint)
+            endpoint.connectionParams = null;
+            cb(endpoint);
 
-        })
+        });
 
     }
 
-    public send(data: any, cb: Callback<P>) {
+    public read(cb: BindCallback, errCb: (data: any) => void = null): void {
+        if (errCb) {
+          this.boundedError.push(errCb);
+        }
+        this.bounded.push(cb);
+    }
 
-        if(!this.connectionParams) {
-            cb(null)
-            return
+    public write(data: any, cb: Callback<P>): void {
+
+        if (!this.connectionParams) {
+            cb(null);
+            return;
         }
 
-        this.plugin.send(data, this.connectionParams, this, cb)
+        this.plugin.write(data, this.connectionParams, this, cb);
     }
 
 }

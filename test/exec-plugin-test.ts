@@ -1,7 +1,37 @@
-import ExecPlugin from '../src/exec-plugin';
-import { Endpoint, BindCallback } from '../src/endpoint';
+import ExecPlugin, { Param } from '../src/plugins/exec-plugin';
+import ServiceChassis, { BindCallback } from '../src/endpoint';
 import { assert } from 'chai';
-import { join } from 'path';
+import * as path from 'path';
+
+function readAssert(server: ServiceChassis<Param>, done: any): void {
+
+    function flatten<T> (arr: T[][]): T[] {
+        return Array.prototype.concat(...arr);
+    }
+
+    const checkArray: string[] = [];
+
+    server.read(data => {
+        checkArray.push(data);
+        if (data === null) {
+            assert.isNull(checkArray[checkArray.length - 1]);
+            assert.deepEqual(
+                flatten(checkArray.slice(0, -1).map(el => {
+                    return String(el).split('\n');
+                }))
+                    .filter( el => el !== '')
+                    .map(n => parseInt(n, 10)), [1, 2, 3, 4, 5, 6]
+            );
+
+            done();
+        }
+
+    }, data => {
+        assert.fail();
+        done();
+    });
+
+}
 
 describe('exec plugin', () => {
 
@@ -10,56 +40,36 @@ describe('exec plugin', () => {
         it('can receive if spawned.', done => {
 
             const plugin = new ExecPlugin();
-            const execDingsBums = new Endpoint(plugin);
-            const checkArray: string[] = [];
+            const server = new ServiceChassis(plugin);
 
-            execDingsBums.bind(data => {
+            readAssert(server, done);
 
-                checkArray.push(data);
-                if (data === null) {
-                    assert.isNull(checkArray[checkArray.length - 1]);
-                    assert.deepEqual(checkArray.slice(0, -1).map(n => parseInt(n, 10)), [1, 2, 3, 4, 5, 6]);
-                    done();
-                }
-
-            }, data => {
-                assert.fail();
-                done();
-            });
-
-            execDingsBums.connect({
+            server.connect({
                 command: process.execPath,
-                argv: [ '-e', '[1, 2, 3, 4, 5, 6].forEach(console.log)' ]
+                argv: [ '-e', '[1, 2, 3, 4, 5, 6].forEach(el => console.log(el))' ]
             }, endpoint => {/**/});
 
         });
 
-        it.only('can send to client and receive call back.', done => {
+        it('can send to client and receive call back.', done => {
 
             const plugin = new ExecPlugin();
-            const server = new Endpoint(plugin);
+            const server = new ServiceChassis(plugin);
             const checkArray: string[] = [];
 
-            server.bind(data => {
-                checkArray.push(data);
-                if (data === null) {
-                    assert.isNull(checkArray[checkArray.length - 1]);
-                    assert.deepEqual(checkArray.slice(0, -1).map(n => parseInt(n, 10)), [1, 2, 3, 4, 5, 6]);
-                    done();
-                }
+            const flatten = (arr: any) => Array.prototype.concat(...arr);
 
-            }, data => {
-                assert.fail();
-                done();
-            });
+            readAssert(server, done);
 
             server.connect({
                 command: process.execPath,
-                argv: [ join('dist', 'test', 'test-subProcess.js') ]
+                argv: [ path.join('dist', 'test', '_test-subProcess.js') ]
             }, endpoint => {
-                [1, 2, 3, 4, 5, 6].forEach( el => {
-                    server.send(`${el}\n`, serverSendEndpoint => {
-                        /**/
+                [1, 2, 3, 4, 5, 6].forEach( (el, index, all) => {
+                    server.write(`${el}\n`, serverSendEndpoint => {
+                       if (index == all.length - 1) {
+                           server.close(() => {/**/});
+                       }
                     });
                 });
             });

@@ -1,6 +1,6 @@
 import { assert } from 'chai';
-import { Endpoint } from '../src/endpoint';
-import MemoryPlugin from '../src/memory-plugin';
+import ServiceChassis from '../src/endpoint';
+import MemoryPlugin from '../src/plugins/memory-plugin';
 
 describe('Endpoint', () => {
     describe('connect', () => {
@@ -8,8 +8,8 @@ describe('Endpoint', () => {
         it('Can connect', done => {
 
             const plugin = new MemoryPlugin();
-            const instanceLeft = new Endpoint(plugin);
-            const instanceRight = new Endpoint(plugin);
+            const instanceLeft = new ServiceChassis(plugin);
+            const instanceRight = new ServiceChassis(plugin);
 
             instanceLeft.connect({ channelName: 'channelName' }, endpoint => {
                 assert.isNull(endpoint);
@@ -41,7 +41,7 @@ describe('Endpoint', () => {
         it('can close connections', done => {
 
             const plugin = new MemoryPlugin();
-            const instance = new Endpoint(plugin);
+            const instance = new ServiceChassis(plugin);
 
             instance.close(endpoint => {
 
@@ -72,7 +72,7 @@ describe('Endpoint', () => {
         it('listen:listen', done => {
 
             const plugin = new MemoryPlugin();
-            const instance = new Endpoint(plugin);
+            const instance = new ServiceChassis(plugin);
 
             instance.listen({ channelName: 'channelName' }, listenEndpoint => {
 
@@ -97,7 +97,7 @@ describe('Endpoint', () => {
         it('listen:connect', done => {
 
             const plugin = new MemoryPlugin();
-            const instance = new Endpoint(plugin);
+            const instance = new ServiceChassis(plugin);
 
             instance.listen({ channelName: 'channelName' }, listenEndpoint => {
 
@@ -122,7 +122,7 @@ describe('Endpoint', () => {
         it('connect:listen', done => {
 
             const plugin = new MemoryPlugin();
-            const instance = new Endpoint(plugin);
+            const instance = new ServiceChassis(plugin);
 
             instance.connect({ channelName: 'channelName' }, connectEndpoint => {
 
@@ -147,7 +147,7 @@ describe('Endpoint', () => {
         it('connect:connect', done => {
 
             const plugin = new MemoryPlugin();
-            const instance = new Endpoint(plugin);
+            const instance = new ServiceChassis(plugin);
 
             instance.connect({ channelName: 'channelName' }, connectEndpoint => {
 
@@ -171,9 +171,9 @@ describe('Endpoint', () => {
         it('cannot send if not connected.', done => {
 
             const plugin = new MemoryPlugin();
-            const instance = new Endpoint(plugin);
+            const instance = new ServiceChassis(plugin);
 
-            instance.send('TEST', endpoint => {
+            instance.write('TEST', endpoint => {
 
                 assert.isNull(endpoint);
                 done();
@@ -185,11 +185,11 @@ describe('Endpoint', () => {
         it('can send if connected.', done => {
 
             const plugin = new MemoryPlugin();
-            const server = new Endpoint(plugin);
+            const server = new ServiceChassis(plugin);
 
             server.listen({ channelName: 'channelName' }, endpoint => {
 
-                server.send('TEST', sendEndpoint => {
+                server.write('TEST', sendEndpoint => {
 
                     assert.isNull(sendEndpoint);
 
@@ -207,8 +207,8 @@ describe('Endpoint', () => {
         it('can send to client and receive call back.', done => {
 
             const plugin = new MemoryPlugin();
-            const server = new Endpoint(plugin);
-            const client = new Endpoint(plugin);
+            const server = new ServiceChassis(plugin);
+            const client = new ServiceChassis(plugin);
 
             server.listen({ channelName: 'server' }, endpoint => {
 
@@ -218,11 +218,11 @@ describe('Endpoint', () => {
 
                     assert.isNotNull(connectEndpoint);
 
-                    client.bind(msg => {
+                    client.read(msg => {
 
                         assert.equal(msg, 'TEST');
 
-                        client.send('GOTCHA', sendEndpoint => {
+                        client.write('GOTCHA', sendEndpoint => {
 
                             assert.isNotNull(sendEndpoint);
 
@@ -230,7 +230,7 @@ describe('Endpoint', () => {
 
                     });
 
-                    server.bind( msg => {
+                    server.read( msg => {
 
                         assert.equal(msg, 'GOTCHA');
 
@@ -246,7 +246,7 @@ describe('Endpoint', () => {
                         });
                     });
 
-                    server.send('TEST', serverSendEndpoint => {
+                    server.write('TEST', serverSendEndpoint => {
 
                         assert.isNotNull(serverSendEndpoint);
 
