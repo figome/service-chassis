@@ -63,10 +63,10 @@ abstract class Scanner extends State {
         while (ofs < fragment.length) {
             const ret = this.streamScanner.findNext(fragment, ofs,
                 (_fragment: string, pos: number) => {
-                // console.log('findNext', this.match, fragment.substr(ofs), this.next.match);
-                cb(ofs);
-                next = { pos: pos, step: this.next };
-            });
+                    // console.log('findNext', this.match, fragment.substr(ofs), this.next.match);
+                    cb(ofs);
+                    next = { pos: pos, step: this.next };
+                });
             if (next) {
                 return next;
             }
@@ -79,14 +79,14 @@ abstract class Scanner extends State {
 class FirstScanner extends Scanner {
     public feed(fragment: string, ofs: number): Step {
         return super._feed(fragment, ofs, (_ofs: number) => {
-            this.fragBuffer.frags = [ ];
+            this.fragBuffer.frags = [];
         });
     }
 }
 
 class LastScanner extends Scanner {
     public feed(fragment: string, ofs: number): Step {
-        const sPos: StringPos = {start: ofs, str: fragment};
+        const sPos: StringPos = { start: ofs, str: fragment };
         this.fragBuffer.frags.push(sPos);
         return super._feed(fragment, ofs, (_ofs: number) => {
             sPos.end = _ofs;
@@ -136,7 +136,7 @@ class StreamPlayload {
         this.graph = StreamPlayload.buildStateGraph(first, last, this.fragBuffer);
     }
 
-    public feed(fragment: string, ofs: number, cb: (fragment: string, ofs: number) => void): void {
+    public feed(fragment: string, ofs: number, cb: (payload: string) => void): void {
         // if (fragment.length > 9) {
         //     console.log('process:', fragment);
         // } else {
@@ -147,7 +147,7 @@ class StreamPlayload {
             const next = this.graph.feed(fragment, ofs);
             this.graph = next.step;
             this.graph = this.graph.action(() => {
-                 console.log('found payload', this.fragBuffer.toString());
+                cb(this.fragBuffer.toString());
             });
             ofs = next.pos;
             // console.log('current-leave', this.graph.match, fragment.substr(ofs), ofs);

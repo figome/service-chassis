@@ -12,7 +12,7 @@ describe('stream-payload', () => {
         fragments.forEach(fragment => {
           sp.feed(fragment, 0, (payload) => assert.equal(hexle.payload[foundIdx++], payload, fragment));
         });
-        // assert.equal(hexle.payload.length, foundIdx);
+        assert.equal(hexle.payload.length, foundIdx);
       });
     });
     done();
