@@ -108,55 +108,30 @@ class StreamScanner {
 
 }
 
-const startDel = '__Juju--';
-const endDel = '__ENDE__';
+[
+    [''],
+    ['', '', '__Juju--', 'found____Juju--', '', ''],
+    ['', '', '__Juju-+', '', ''],
+    ['', 'm', '_', '_J', 'u', 'ju-', '-', 'found'],
+    ['', 'm', '_', '_J', 'u', 'ju-', '+', 'meno'],
+    ['meno__Juju--__Juju--found'],
+    ['meno__Juju-+meno']
+].forEach((elements, index) => {
 
-function findStart(stringToSearchIn: string, startDelimeter: string): number {
-    return stringToSearchIn.indexOf(startDelimeter);
-}
+    console.log(`Creating new graph from stream (${JSON.stringify(elements)})`);
+    const s2 = new StreamScanner('__Juju--');
 
-function findEnd(stringToSearchIn: string, endDelimeter: string): number {
-    return stringToSearchIn.indexOf(endDelimeter);
-}
-
-function stepThroughMessage(message: string, payload: string[] = []): string[] {
-    const payloadBegin = findStart(message, startDel);
-    const payloadEnd = findEnd(message, endDel);
-
-    if (!~payloadBegin) {
-        return payload;
-    } else if (payloadBegin >= payloadEnd) {
-        return stepThroughMessage(message.substring(payloadEnd + endDel.length), payload);
-    } else {
-        payload.push(message.substring(payloadBegin + startDel.length, payloadEnd));
-        return stepThroughMessage(message.substr(payloadEnd + endDel.length), payload);
-    }
-}
-
-// [
-//     [''],
-//     ['', '', '__Juju--', 'found____Juju--', '', ''],
-//     ['', '', '__Juju-+', '', ''],
-//     ['', 'm', '_', '_J', 'u', 'ju-', '-', 'found'],
-//     ['', 'm', '_', '_J', 'u', 'ju-', '+', 'meno'],
-//     ['meno__Juju--__Juju--found'],
-//     ['meno__Juju-+meno']
-// ].forEach((elements, index) => {
-
-//     console.log(`Creating new graph from stream (${JSON.stringify(elements)})`);
-//     const s2 = new StreamScanner('__Juju--');
-
-//     elements.forEach(fragment => {
-//         s2.feed(fragment, 0, (f, ofs) => {
-//             console.log('=> found', f, ofs, f.substr(ofs));
-//             // if (ofs < f.length) {
-//             //     console.log('=> FOUND', f, ofs, f.substr(ofs));
-//             // } else {
-//             //     console.log('found it', f, ofs, f.substr(ofs));
-//             // }
-//         });
-//     });
-// });
+    elements.forEach(fragment => {
+        s2.feed(fragment, 0, (f, ofs) => {
+            console.log('=> found', f, ofs, f.substr(ofs));
+            // if (ofs < f.length) {
+            //     console.log('=> FOUND', f, ofs, f.substr(ofs));
+            // } else {
+            //     console.log('found it', f, ofs, f.substr(ofs));
+            // }
+        });
+    });
+});
 
 [
     [
@@ -166,37 +141,32 @@ function stepThroughMessage(message: string, payload: string[] = []): string[] {
     ['m__Juju--found__ENDE____ENDE____Juju--found2__ENDE__']
 ].forEach( elements => {
 
-    // const initialScanner = new StreamScanner('__Juju--');
-    // const endScanner = new StreamScanner('__ENDE__');
+    const initialScanner = new StreamScanner('__Juju--');
+    const endScanner = new StreamScanner('__ENDE__');
 
-    // let payload: string[] = [];
-    // let currentScanner = initialScanner;
+    let payload: string[] = [];
+    let currentScanner = initialScanner;
 
-    // initialScanner.feed(elements.join(''), 0, function found(f, ofs): void {
+    elements.forEach(fragment => {
+        currentScanner.feed(elements.join(''), 0, function found(f, ofs): void {
 
+            if (currentScanner === initialScanner) {
+                endScanner.feed(fragment, ofs, found);
+                currentScanner = endScanner;
+                payload = [ fragment.substr(ofs) ];
+            } else if (currentScanner === endScanner) {
+                payload.push(fragment.substr(0, ofs - currentScanner.hayStack.length));
+                initialScanner.feed(fragment, ofs, found);
+                currentScanner = initialScanner;
+                console.log('PAYLAOD:', payload.join(''), '\n');
 
-    // });
-    console.log(stepThroughMessage(elements.join('')))
-    // elements.forEach(fragment => {
-        // currentScanner.feed(elements.join(''), 0, function found(f, ofs): void {
+            }
 
-            // if (currentScanner === initialScanner) {
-            //     endScanner.feed(fragment, ofs, found);
-            //     currentScanner = endScanner;
-            //     payload = [ fragment.substr(ofs) ];
-            // } else if (currentScanner === endScanner) {
-            //     payload.push(fragment.substr(0, ofs - currentScanner.hayStack.length));
-            //     initialScanner.feed(fragment, ofs, found);
-            //     currentScanner = initialScanner;
-            //     console.log('PAYLAOD:', payload.join(''), '\n');
+        });
 
-            // }
+        if (currentScanner === endScanner) {
+            payload.push(fragment);
+        }
 
-        // });
-
-        // if (currentScanner === endScanner) {
-        //     payload.push(fragment);
-        // }
-
-    // });
+    });
 });
