@@ -1,4 +1,4 @@
-import ServiceChassis, { Plugin, Callback, BindCallback, ReadCallback } from './endpoint';
+import ServiceChassis, { Plugin, Callback, BindCallback, ReadCallback } from '../endpoint';
 
 export class Message {
 
