@@ -16,12 +16,18 @@ interface StringPos {
 }
 class FragBuffer {
     public frags: StringPos[] = null;
+    public match: string;
+    constructor(match: string) {
+        this.match = match;
+    }
     public toString(): string {
-        // this.frags.forEach((i, idx, frags) => {
-
-        // })
-        console.log(this.frags);
-        return null;
+        const ret = this.frags.map((sp: StringPos) => {
+            if (sp.end === undefined) {
+                return sp.str.substr(sp.start);
+            }
+            return sp.str.substring(sp.start, sp.end);
+        }).join('');
+        return ret.substr(0, (ret.length - this.match.length) + 1);
     }
 }
 
@@ -126,7 +132,7 @@ class StreamPlayload {
     constructor(first: string, last: string) {
         this.first = first;
         this.last = last;
-        this.fragBuffer = new FragBuffer();
+        this.fragBuffer = new FragBuffer(last);
         this.graph = StreamPlayload.buildStateGraph(first, last, this.fragBuffer);
     }
 
