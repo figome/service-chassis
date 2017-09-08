@@ -1,8 +1,15 @@
 import { assert } from 'chai';
+import * as path from 'path';
 
-import MessageParserPlugin, { Message } from '../src/msg-parser';
+import Endpoint from '../src/endpoint';
+import NestedEndpoint from '../src/nested-endpoint';
+
+import { Message } from '../src/msg-parser/message';
 import ExecPlugin from '../src/plugins/exec-plugin';
-import ServiceChassis from '../src/endpoint';
+import ReflectorPlugin from '../src/plugins/reflector-plugin';
+import PayloadParserPlugin from '../src/plugins/payload-parser-plugin';
+import PayloadParser from '../src/msg-parser/stream-payload';
+import DebugPlugin from '../src/plugins/debug-plugin';
 
 describe('message parser', () => {
     describe('write', () => {
@@ -33,33 +40,66 @@ describe('message parser', () => {
     });
 
     describe('read', () => {
-        it.only('can identify a message body encapsulated within a separator.', done => {
 
-            function flatten<T> (arr: T[][]): T[] {
-                return Array.prototype.concat(...arr);
-            }
+        it('...', done => {
+            const execPlugin = new ExecPlugin();
+            const reflectorPlugin = new ReflectorPlugin();
 
-            const plugin = new ExecPlugin();
-            const msgPlugin = new MessageParserPlugin(plugin, '__SEP__');
-            const server = new ServiceChassis(plugin);
+            const execInstance = new Endpoint(execPlugin);
+            const simpleInstance = new Endpoint(reflectorPlugin);
 
+            const pp = new PayloadParser('__SEP__', '__SEP__');
             const testMessage = 'testMessage';
 
-            server.read(data => {
-                console.log('FROM TEST:', data);
-            }, data => {
-                assert.fail();
+            simpleInstance.connect({ channelName: 'test'}, () => {/**/});
+
+            execInstance.connect({
+                command: process.execPath,
+                argv: [ '-e', `console.log("__SEP__${testMessage}__SEP__")` ]
+            }, serverEndpoint => {/**/});
+
+            execInstance.read(data => {
+                if (data) {
+                    pp.feed(data.toString('utf8'), 0, (payload) => {
+                        simpleInstance.write(payload, () => {/**/});
+                    });
+                }
+            });
+
+            simpleInstance.read(data => {
+                assert.equal(data, testMessage);
                 done();
             });
 
-            server.connect({
-                command: process.execPath,
-                argv: [ '-e', `console.log(__SEP__${testMessage}__SEP__))` ]
-            }, endpoint => {/**/});
         });
 
-        it('is able to identify a separator spread over multiple messages.', done => {
-            done();
+    });
+
+    describe('nested chassis', () => {
+        it('can nest endpoints', done => {
+
+            const testMessage = 'testMessage';
+            const execPlugin = new ExecPlugin();
+            const execService = new Endpoint(execPlugin).connect({
+                command: process.execPath,
+                argv: [ path.join('dist', 'test', '_test-subProcess') ]
+            }, serverEndpoint => {/**/});
+
+            const debugPlugin = new DebugPlugin();
+            const debugService = new NestedEndpoint(debugPlugin, null, execService);
+
+            const payloadParserPlugin = new PayloadParserPlugin('__SEP__', '__SEP__');
+            const payloadService = new NestedEndpoint(payloadParserPlugin, null, debugService)
+                .connect({}, () => {/**/});
+
+            payloadService.bind(data => {
+                assert.equal(data, testMessage);
+                done();
+            }, null);
+
+            payloadService.write('test', (data) => {
+                console.log('DATA', data);
+            });
         });
     });
 });

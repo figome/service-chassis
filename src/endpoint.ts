@@ -1,35 +1,9 @@
-/*
- * INTERFACES
- */
-export interface Callback<P> {
-    (endpoint?: ServiceChassis<P>): void;
-}
+import ServiceChassis, { Callback, Plugin, BindCallback } from './service-chassis';
 
-export interface ReadCallback<P> {
-    (data: any, endpoint: ServiceChassis<P>): void;
-}
+export default class Endpoint<P> implements ServiceChassis<P> {
 
-export interface BindCallback {
-    (data: any, status?: number, signal?: string): void;
-}
-
-export abstract class Plugin<P> {
-    public abstract listen(param: P, endpoint: ServiceChassis<P>, cb: Callback<P>): void;
-    public abstract connect(param: P, endpoint: ServiceChassis<P>, cb: Callback<P>): void;
-    public abstract close(param: P, endpoint: ServiceChassis<P>, cb: Callback<P>): void;
-    public read(data: any, endpoint: ServiceChassis<P>, cb: ReadCallback<P>): void {
-        cb(data, endpoint);
-    }
-    public abstract write(data: any, param: P, endpoint: ServiceChassis<P>, cb: Callback<P>): void;
-}
-
-/*
- * SERVICE CHASSIS
- */
-export default class ServiceChassis<P> {
-
-    private plugin: Plugin<P>;
-    private connectionParams: P;
+    protected plugin: Plugin<P>;
+    public connectionParams: P;
     public bounded: BindCallback[];
     public boundedError: ((data: any) => void)[];
 
@@ -39,23 +13,24 @@ export default class ServiceChassis<P> {
         this.boundedError = [];
     }
 
-    public listen(param: P, cb: Callback<P>): void {
+    public listen(param: P, cb: Callback<P>): ServiceChassis<P> {
 
         if (this.connectionParams) {
             cb(null);
-            return;
+            return this;
         }
 
         this.connectionParams = param;
         this.plugin.listen(param, this, cb);
 
+        return this;
     }
 
-    public connect(param: P, cb: Callback<P>): void {
+    public connect(param: P, cb: Callback<P>): ServiceChassis<P> {
 
         if (this.connectionParams) {
             cb(null);
-            return;
+            return this;
         }
 
         this.plugin.connect(param, this, (endpoint) => {
@@ -67,6 +42,7 @@ export default class ServiceChassis<P> {
             cb(endpoint);
         });
 
+        return this;
     }
 
     public close(cb: Callback<P>): void {
@@ -85,11 +61,13 @@ export default class ServiceChassis<P> {
 
     }
 
-    public read(cb: BindCallback, errCb: (data: any) => void = null): void {
+    public bind(cb: BindCallback, errCb: (data: any) => void = null): void {
         if (errCb) {
           this.boundedError.push(errCb);
         }
+
         this.bounded.push(cb);
+
     }
 
     public write(data: any, cb: Callback<P>): void {
@@ -99,7 +77,13 @@ export default class ServiceChassis<P> {
             return;
         }
 
-        this.plugin.write(data, this.connectionParams, this, cb);
+        this.plugin.write(data, this, cb);
+    }
+
+    public gulp(data: any, cb: Callback<P>): void {/**/}
+
+    public feed(data: any, cb: Callback<P>): void {
+        this.plugin.feed(data, this, cb);
     }
 
 }

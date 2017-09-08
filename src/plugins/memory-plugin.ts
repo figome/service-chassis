@@ -1,4 +1,4 @@
-import ServiceChassis, { Plugin, Callback, ReadCallback } from '../endpoint';
+import ServiceChassis, { Plugin, Callback, ReadCallback } from '../service-chassis';
 
 export interface Param {
     channelName: string;
@@ -46,7 +46,7 @@ export class MemoryPlugin extends Plugin<Param> {
 
     }
 
-    public write(data: any, param: Param, endpoint: ServiceChassis<Param>, cb: Callback<Param>): void {
+    public read(data: any, param: Param, endpoint: ServiceChassis<Param>, cb: Callback<Param>): void {
 
         const endpointToSendTo = this.serviceMap.get(param.channelName).find((i) => endpoint !== i);
 

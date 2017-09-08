@@ -1,5 +1,7 @@
 import ExecPlugin, { Param } from '../src/plugins/exec-plugin';
-import ServiceChassis, { BindCallback } from '../src/endpoint';
+import ServiceChassis, { BindCallback } from '../src/service-chassis';
+import Endpoint from '../src/endpoint';
+
 import { assert } from 'chai';
 import * as path from 'path';
 
@@ -11,7 +13,7 @@ function readAssert(server: ServiceChassis<Param>, done: any): void {
 
     const checkArray: string[] = [];
 
-    server.read(data => {
+    server.bind(data => {
         checkArray.push(data);
         if (data === null) {
             assert.isNull(checkArray[checkArray.length - 1]);
@@ -40,7 +42,7 @@ describe('exec plugin', () => {
         it('can receive if spawned.', done => {
 
             const plugin = new ExecPlugin();
-            const server = new ServiceChassis(plugin);
+            const server = new Endpoint(plugin);
 
             readAssert(server, done);
 
@@ -54,10 +56,8 @@ describe('exec plugin', () => {
         it('can send to client and receive call back.', done => {
 
             const plugin = new ExecPlugin();
-            const server = new ServiceChassis(plugin);
+            const server = new Endpoint(plugin);
             const checkArray: string[] = [];
-
-            const flatten = (arr: any) => Array.prototype.concat(...arr);
 
             readAssert(server, done);
 

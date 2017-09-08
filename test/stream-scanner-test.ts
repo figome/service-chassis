@@ -1,6 +1,6 @@
 import StreamScanner from '../src/msg-parser/stream-scanner';
 import { assert } from 'chai';
-import { fragentize } from './hexler-helper';
+import { fragmentizeOneSeparator } from './hexler-helper';
 
 describe('stream-scanner', () => {
 
@@ -14,7 +14,7 @@ describe('stream-scanner', () => {
   });
 
   it('find', (done) => {
-    fragentize().forEach((hexle) => {
+    fragmentizeOneSeparator().forEach((hexle) => {
       hexle.hexle.forEach(fragments => {
         const s2 = new StreamScanner('__Juju--');
         let count = hexle.findCount;

@@ -1,4 +1,4 @@
-import ServiceChassis, { Plugin, Callback } from '../endpoint';
+import ServiceChassis, { Plugin, Callback } from '../service-chassis';
 import * as stream from 'stream';
 import { spawn, ChildProcess } from 'child_process';
 
@@ -23,18 +23,18 @@ export class ExecPlugin extends Plugin<Param> {
 
     public connect(param: Param, endpoint: ServiceChassis<Param>, cb: Callback<Param>): void {
 
-        const subProcess = spawn(param.command, param.argv);
+        this.subProcess = spawn(param.command, param.argv);
 
-        subProcess.on('close', (status, signal) => {
+        this.subProcess.on('close', (status, signal) => {
             endpoint.bounded.forEach( bound => bound(null, status, signal));
         });
 
-        subProcess.on('error', (data: any) => {
+        this.subProcess.on('error', (data: any) => {
             endpoint.boundedError.forEach( bound => bound(data));
         });
 
-        this.toSubProcess = subProcess.stdin;
-        this.fromSubProcess = subProcess.stdout;
+        this.toSubProcess = this.subProcess.stdin;
+        this.fromSubProcess = this.subProcess.stdout;
 
         this.fromSubProcess.on('data', data => {
             endpoint.bounded.forEach( bound => bound(data));
@@ -56,7 +56,7 @@ export class ExecPlugin extends Plugin<Param> {
 
     }
 
-    public write(data: any, param: Param, endpoint: ServiceChassis<Param>, cb: Callback<Param>): void {
+    public read(data: any, param: Param, endpoint: ServiceChassis<Param>, cb: Callback<Param>): void {
 
         this.toSubProcess.write(data, () => {
             cb(endpoint);

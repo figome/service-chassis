@@ -129,6 +129,10 @@ class StreamPlayload {
         this.graph = StreamPlayload.buildStateGraph(first, last, this.fragBuffer);
     }
 
+    public write(data: string): string {
+        return `${this.first}${data}${this.last}`;
+    }
+    
     public feed(fragment: string, ofs: number, cb: (payload: string) => void): void {
         while (ofs < fragment.length) {
             const next = this.graph.feed(fragment, ofs);
