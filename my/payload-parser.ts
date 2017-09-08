@@ -105,7 +105,7 @@ class FoundScanner extends State {
     }
 }
 
-class StreamPlayload {
+class PayloadParser {
     private graph: State;
     public first: string;
     public last: string;
@@ -126,13 +126,13 @@ class StreamPlayload {
         this.first = first;
         this.last = last;
         this.fragBuffer = new FragBuffer(last);
-        this.graph = StreamPlayload.buildStateGraph(first, last, this.fragBuffer);
+        this.graph = PayloadParser.buildStateGraph(first, last, this.fragBuffer);
     }
 
     public write(data: string): string {
         return `${this.first}${data}${this.last}`;
     }
-    
+
     public feed(fragment: string, ofs: number, cb: (payload: string) => void): void {
         while (ofs < fragment.length) {
             const next = this.graph.feed(fragment, ofs);
@@ -145,4 +145,4 @@ class StreamPlayload {
 
 }
 
-export default StreamPlayload;
+export default PayloadParser;
