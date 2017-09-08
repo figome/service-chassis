@@ -1,4 +1,3 @@
-
 import StreamScanner from './stream-scanner';
 
 interface Step {
@@ -14,6 +13,7 @@ interface StringPos {
     end?: number;
     str: string;
 }
+
 class FragBuffer {
     public frags: StringPos[] = null;
     public match: string;
@@ -58,12 +58,10 @@ abstract class Scanner extends State {
     }
 
     protected _feed(fragment: string, ofs: number, cb: (ofs: number) => void): Step {
-        // console.log('feed:', this.match, fragment, ofs);
         let next: Step = null;
         while (ofs < fragment.length) {
             const ret = this.streamScanner.findNext(fragment, ofs,
                 (_fragment: string, pos: number) => {
-                    // console.log('findNext', this.match, fragment.substr(ofs), this.next.match);
                     cb(ofs);
                     next = { pos: pos, step: this.next };
                 });
@@ -95,15 +93,12 @@ class LastScanner extends Scanner {
 }
 
 class FoundScanner extends State {
-
     constructor() {
         super('FoundScanner');
     }
-
     public feed(fragment: string, ofs: number): Step {
         return null;
     }
-
     public action(cb: () => void): State {
         cb();
         return this.next;
@@ -119,10 +114,8 @@ class StreamPlayload {
     private static buildStateGraph(first: string, last: string, fragBuffer: FragBuffer): State {
         const graph = new FirstScanner(first, fragBuffer);
         let _first: State = graph;
-
         const _last = new LastScanner(last, fragBuffer);
         _first.next = _last;
-
         const foundScanner = new FoundScanner();
         _last.next = foundScanner;
         foundScanner.next = graph;
@@ -137,113 +130,15 @@ class StreamPlayload {
     }
 
     public feed(fragment: string, ofs: number, cb: (payload: string) => void): void {
-        // if (fragment.length > 9) {
-        //     console.log('process:', fragment);
-        // } else {
-        //     return;
-        // }
         while (ofs < fragment.length) {
-            // console.log('current-enter', this.graph.match, fragment.substr(ofs), ofs);
             const next = this.graph.feed(fragment, ofs);
-            this.graph = next.step;
-            this.graph = this.graph.action(() => {
+            this.graph = next.step.action(() => {
                 cb(this.fragBuffer.toString());
             });
             ofs = next.pos;
-            // console.log('current-leave', this.graph.match, fragment.substr(ofs), ofs);
-            /*
-            while (ofs < fragment.length) {
-                const ret = this.graph.scan(fragment, ofs);
-                this.graph = ret.step.action(() => cb(fragment, ret.pos));
-                ofs = ret.pos;
-            }
-            */
         }
     }
 
 }
 
 export default StreamPlayload;
-
-// // [
-// //     [''],
-// //     ['', '', '__Juju--', 'found____Juju--', '', ''],
-// //     ['', '', '__Juju-+', '', ''],
-// //     ['', 'm', '_', '_J', 'u', 'ju-', '-', 'found'],
-// //     ['', 'm', '_', '_J', 'u', 'ju-', '+', 'meno'],
-// //     ['meno__Juju--__Juju--found'],
-// //     ['meno__Juju-+meno']
-// // ].forEach((elements, index) => {
-
-// //     console.log(`Creating new graph from stream (${JSON.stringify(elements)})`);
-// //     const s2 = new StreamScanner('__Juju--');
-
-// //     elements.forEach(fragment => {
-// //         s2.feed(fragment, 0, (f, ofs) => {
-// //             console.log('=> found', f, ofs, f.substr(ofs));
-// //             // if (ofs < f.length) {
-// //             //     console.log('=> FOUND', f, ofs, f.substr(ofs));
-// //             // } else {
-// //             //     console.log('found it', f, ofs, f.substr(ofs));
-// //             // }
-// //         });
-// //     });
-// // });
-
-// [
-//     // ['', 'm', '_', '_J', 'u', 'ju-', '-', 'found', '__ENDE__',
-//     // '__ENDE__', '_', '_J', 'u', 'ju-', '-', 'found2', '__ENDE__'],
-//     ['m__Juju--found__ENDE____ENDE____Juju--found2__ENDE__']
-// ].forEach(elements => {
-
-//     const initialScanner = new StreamScanner('__Juju--');
-//     const endScanner = new StreamScanner('__ENDE__');
-
-//     let payload: string[] = [];
-//     // let offset = 0;
-//     let currentScanner = initialScanner;
-
-//     // function found(f: string, ofs: number): void {
-//     //     console.log(currentScanner.hayStack, ofs, ' => ', f);
-//     // }
-
-//     console.log();
-
-//     initialScanner.feed(elements.join(''), 0, function found(f, ofs): void {
-
-//         console.log(currentScanner.hayStack, ofs, ' => ', f);
-
-//         if (currentScanner === initialScanner) {
-//             currentScanner = endScanner;
-//         } else {
-//             console.log('PAYLOAD:', f.substr(0, ofs - currentScanner.hayStack.length), '\n');
-//             currentScanner = initialScanner;
-//         }
-
-//         currentScanner.feed(f.substr(ofs), 0, found);
-
-//     });
-
-//     // elements.forEach(fragment => {
-//     // currentScanner.feed(elements.join(''), 0, function found(f, ofs): void {
-
-//     // if (currentScanner === initialScanner) {
-//     //     endScanner.feed(fragment, ofs, found);
-//     //     currentScanner = endScanner;
-//     //     payload = [ fragment.substr(ofs) ];
-//     // } else if (currentScanner === endScanner) {
-//     //     payload.push(fragment.substr(0, ofs - currentScanner.hayStack.length));
-//     //     initialScanner.feed(fragment, ofs, found);
-//     //     currentScanner = initialScanner;
-//     //     console.log('PAYLAOD:', payload.join(''), '\n');
-
-//     // }
-
-//     // });
-
-//     // if (currentScanner === endScanner) {
-//     //     payload.push(fragment);
-//     // }
-
-//     // });
-// });
