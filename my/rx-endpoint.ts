@@ -24,6 +24,7 @@ export class RxEndpoint {
   public recvFn: DataRxs;
 
   constructor() {
+    // console.log('RxEndpoint');
     this.rxRecv = new rx.Subject();
     this.recvFn = passThru;
     this.rxRecv.subscribe((data: any) => {
@@ -60,19 +61,19 @@ export class RxEndpoint {
 
 export default RxEndpoint;
 
-const rx0 = new RxEndpoint().recv((data, rxs) => {
-  rx0.rxSend.next(data);
-});
+// const rx0 = new RxEndpoint().recv((data, rxs) => {
+//   rx0.rxSend.next(data);
+// });
 
-const flep = FirstLastEndpoint('__BEG__', '__END__');
-const dep = DebugEndpoint();
+// const flep = FirstLastEndpoint('__BEG__', '__END__');
+// const dep = DebugEndpoint();
 
-const rx2 = new RxEndpoint();
-rx2.send((data: any, rxs) => {
-  console.log('RX2:', data);
-});
+// const rx2 = new RxEndpoint();
+// rx2.send((data: any, rxs) => {
+//   console.log('RX2:', data);
+// });
 
-rx0.stack(dep).stack(flep).stack(rx2);
+// rx0.stack(dep).stack(flep).stack(rx2);
 
-rx2.rxRecv.next('recv-0');
-rx2.rxRecv.next('recv-1');
+// rx2.rxRecv.next('recv-0');
+// rx2.rxRecv.next('recv-1');

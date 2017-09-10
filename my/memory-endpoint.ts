@@ -2,42 +2,42 @@ import * as rx from './urxjs';
 import RxEndpoint from './rx-endpoint';
 import PayloadParser from './payload-parser';
 
-export function MemoryEndpoint(serviceMap: Map<string, rx.Subject<any>[]>): RxEndpoint {
-    return new RxEndpoint()
-        .send((data: any, rxs: rx.Subject<any>) => {
-            /* */
-        })
-        .recv((data: any, rxs: rx.Subject<any>) => {
-            /* */
-        });
+export class MemoryEndpoint {
+    private serviceMap: Map<string, RxEndpoint[]>;
+
+    constructor() {
+        this.serviceMap = new Map<string, RxEndpoint[]>();
+    }
+
+    public listen(cname: string): RxEndpoint {
+        if (this.serviceMap.has(cname)) {
+            return null;
+        }
+        const partners: RxEndpoint[] = [];
+        const ret = new RxEndpoint()
+            .send((data: any, rxs: rx.Subject<any>) => {
+                partners[1].rxRecv.next(data);
+            });
+        partners.push(ret);
+        this.serviceMap.set(cname, partners);
+        return ret;
+    }
+
+    public connect(cname: string): RxEndpoint {
+        const partner = this.serviceMap.get(cname);
+        if (!partner && partner.length != 1) {
+            return null;
+        }
+        const ret = new RxEndpoint()
+            .send((data: any, rxs: rx.Subject<any>) => {
+                partner[0].rxRecv.next(data);
+            });
+        partner.push(ret);
+        return ret;
+    }
 }
 
 export default MemoryEndpoint;
-
-//     public listen(param: Param, endpoint: ServiceChassis<Param>, cb: Callback<Param>): void {
-//         if (this.serviceMap.has(param.channelName)) {
-//             cb(null);
-//             return;
-//         }
-//         this.serviceMap.set(param.channelName, [endpoint]);
-//         cb(endpoint);
-
-//     }
-
-//     public connect(param: Param, endpoint: ServiceChassis<Param>, cb: Callback<Param>): void {
-//         const map = this.serviceMap.get(param.channelName);
-//         if (!map) {
-//             cb(null);
-//             return;
-//         }
-//         if (map.length != 1) {
-//             cb(null);
-//             return;
-//         }
-//         map.push(endpoint);
-//         cb(endpoint);
-
-//     }
 
 //     public close(param: Param, endpoint: ServiceChassis<Param>, cb: Callback<Param>): void {
 

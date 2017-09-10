@@ -1,258 +1,247 @@
 import { assert } from 'chai';
-import ServiceChassis from '../src/endpoint';
-import MemoryPlugin from '../src/plugins/memory-plugin';
+import MemoryEndpoint from '../my/memory-endpoint';
+
+// import ServiceChassis from '../src/endpoint';
+// import MemoryPlugin from '../src/plugins/memory-plugin';
 
 describe('Endpoint', () => {
-    describe('connect', () => {
+    // describe('connect', () => {
 
-        it('Can connect', done => {
+        // it('Can connect', done => {
 
-            const plugin = new MemoryPlugin();
-            const instanceLeft = new ServiceChassis(plugin);
-            const instanceRight = new ServiceChassis(plugin);
+        //     const plugin = new MemoryPlugin();
+        //     const instanceLeft = new ServiceChassis(plugin);
+        //     const instanceRight = new ServiceChassis(plugin);
 
-            instanceLeft.connect({ channelName: 'channelName' }, endpoint => {
-                assert.isNull(endpoint);
-                instanceRight.listen({ channelName: 'channelName' }, leftListenEndpoint => {
+        //     instanceLeft.connect({ channelName: 'channelName' }, endpoint => {
+        //         assert.isNull(endpoint);
+        //         instanceRight.listen({ channelName: 'channelName' }, leftListenEndpoint => {
 
-                    assert.isNotNull(leftListenEndpoint, 'instanceRight listen');
+        //             assert.isNotNull(leftListenEndpoint, 'instanceRight listen');
 
-                    instanceLeft.connect({ channelName: 'channelName' }, leftConnectEndpoint => {
+        //             instanceLeft.connect({ channelName: 'channelName' }, leftConnectEndpoint => {
 
-                        assert.isNotNull(leftConnectEndpoint, `InstanceLeft connect ${endpoint}`);
+        //                 assert.isNotNull(leftConnectEndpoint, `InstanceLeft connect ${endpoint}`);
 
-                        instanceRight.close(rightCloseEndpoint => {
+        //                 instanceRight.close(rightCloseEndpoint => {
 
-                            assert.isNotNull(rightCloseEndpoint, 'InstanceRight close');
+        //                     assert.isNotNull(rightCloseEndpoint, 'InstanceRight close');
 
-                            instanceLeft.close(leftCloseEndpoint => {
+        //                     instanceLeft.close(leftCloseEndpoint => {
 
-                                assert.isNotNull(leftCloseEndpoint, 'InstanceLeft close');
+        //                         assert.isNotNull(leftCloseEndpoint, 'InstanceLeft close');
 
-                                done();
+        //                         done();
 
-                            });
-                        });
-                    });
-                });
-            });
-        });
+        //                     });
+        //                 });
+        //             });
+        //         });
+        //     });
+        // });
 
-        it('can close connections', done => {
+    //     it('can close connections', done => {
 
-            const plugin = new MemoryPlugin();
-            const instance = new ServiceChassis(plugin);
+    //         const plugin = new MemoryPlugin();
+    //         const instance = new ServiceChassis(plugin);
 
-            instance.close(endpoint => {
+    //         instance.close(endpoint => {
 
-                assert.isNull(endpoint);
+    //             assert.isNull(endpoint);
 
-                instance.listen({ channelName: 'channelName' }, listenEndpoint => {
+    //             instance.listen({ channelName: 'channelName' }, listenEndpoint => {
 
-                    assert.isNotNull(listenEndpoint);
+    //                 assert.isNotNull(listenEndpoint);
 
-                    instance.close(closeEndpoint => {
+    //                 instance.close(closeEndpoint => {
 
-                        assert.isNotNull(closeEndpoint);
+    //                     assert.isNotNull(closeEndpoint);
 
-                        instance.close(secondCloseEndpoint => {
+    //                     instance.close(secondCloseEndpoint => {
 
-                            assert.isNull(secondCloseEndpoint);
+    //                         assert.isNull(secondCloseEndpoint);
 
-                            done();
+    //                         done();
 
-                        });
-                    });
-                });
-            });
-        });
-    });
+    //                     });
+    //                 });
+    //             });
+    //         });
+    //     });
+    // });
 
-    describe('double Connect/listen', () => {
-        it('listen:listen', done => {
+    // describe('double Connect/listen', () => {
+    //     it('listen:listen', done => {
 
-            const plugin = new MemoryPlugin();
-            const instance = new ServiceChassis(plugin);
+    //         const plugin = new MemoryPlugin();
+    //         const instance = new ServiceChassis(plugin);
 
-            instance.listen({ channelName: 'channelName' }, listenEndpoint => {
+    //         instance.listen({ channelName: 'channelName' }, listenEndpoint => {
 
-                assert.isNotNull(listenEndpoint);
+    //             assert.isNotNull(listenEndpoint);
 
-                instance.listen({ channelName: 'channelName' }, secondListenEndpoint => {
+    //             instance.listen({ channelName: 'channelName' }, secondListenEndpoint => {
 
-                    assert.isNull(secondListenEndpoint);
+    //                 assert.isNull(secondListenEndpoint);
 
-                    instance.close(closeEndpoint => {
+    //                 instance.close(closeEndpoint => {
 
-                        assert.isNotNull(closeEndpoint);
+    //                     assert.isNotNull(closeEndpoint);
 
-                        done();
-                    });
+    //                     done();
+    //                 });
 
-                });
+    //             });
 
-            });
-        });
+    //         });
+    //     });
 
-        it('listen:connect', done => {
+    //     it('listen:connect', done => {
 
-            const plugin = new MemoryPlugin();
-            const instance = new ServiceChassis(plugin);
+    //         const plugin = new MemoryPlugin();
+    //         const instance = new ServiceChassis(plugin);
 
-            instance.listen({ channelName: 'channelName' }, listenEndpoint => {
+    //         instance.listen({ channelName: 'channelName' }, listenEndpoint => {
 
-                assert.isNotNull(listenEndpoint);
+    //             assert.isNotNull(listenEndpoint);
 
-                instance.connect({ channelName: 'channelName' }, connectEndpoint => {
+    //             instance.connect({ channelName: 'channelName' }, connectEndpoint => {
 
-                    assert.isNull(connectEndpoint);
+    //                 assert.isNull(connectEndpoint);
 
-                    instance.close(closeEndpoint => {
+    //                 instance.close(closeEndpoint => {
 
-                        assert.isNotNull(closeEndpoint);
+    //                     assert.isNotNull(closeEndpoint);
 
-                        done();
-                    });
+    //                     done();
+    //                 });
 
-                });
+    //             });
 
-            });
-        });
+    //         });
+    //     });
 
-        it('connect:listen', done => {
+    //     it('connect:listen', done => {
 
-            const plugin = new MemoryPlugin();
-            const instance = new ServiceChassis(plugin);
+    //         const plugin = new MemoryPlugin();
+    //         const instance = new ServiceChassis(plugin);
 
-            instance.connect({ channelName: 'channelName' }, connectEndpoint => {
+    //         instance.connect({ channelName: 'channelName' }, connectEndpoint => {
 
-                assert.isNull(connectEndpoint, 'instance connect');
+    //             assert.isNull(connectEndpoint, 'instance connect');
 
-                instance.listen({ channelName: 'channelName' }, listenEndpoint => {
+    //             instance.listen({ channelName: 'channelName' }, listenEndpoint => {
 
-                    assert.isNotNull(listenEndpoint, 'instance listen after connect');
+    //                 assert.isNotNull(listenEndpoint, 'instance listen after connect');
 
-                    instance.close(closeEndpoint => {
+    //                 instance.close(closeEndpoint => {
 
-                        assert.isNotNull(closeEndpoint);
+    //                     assert.isNotNull(closeEndpoint);
 
-                        done();
-                    });
+    //                     done();
+    //                 });
 
-                });
+    //             });
 
-            });
-        });
+    //         });
+    //     });
 
-        it('connect:connect', done => {
+    //     it('connect:connect', done => {
 
-            const plugin = new MemoryPlugin();
-            const instance = new ServiceChassis(plugin);
+    //         const plugin = new MemoryPlugin();
+    //         const instance = new ServiceChassis(plugin);
 
-            instance.connect({ channelName: 'channelName' }, connectEndpoint => {
+    //         instance.connect({ channelName: 'channelName' }, connectEndpoint => {
 
-                assert.isNull(connectEndpoint, 'instance connect');
+    //             assert.isNull(connectEndpoint, 'instance connect');
 
-                instance.connect({ channelName: 'channelName' }, secondConnectEndpoint => {
+    //             instance.connect({ channelName: 'channelName' }, secondConnectEndpoint => {
 
-                    assert.isNull(secondConnectEndpoint, 'instance listen after connect');
+    //                 assert.isNull(secondConnectEndpoint, 'instance listen after connect');
 
-                    done();
+    //                 done();
 
-                });
+    //             });
 
-            });
-        });
+    //         });
+    //     });
 
-    });
+    // });
 
     describe('send/bind', () => {
 
-        it('cannot send if not connected.', done => {
+        // it('cannot send if not connected.', done => {
 
-            const plugin = new MemoryPlugin();
-            const instance = new ServiceChassis(plugin);
+        //     const plugin = new MemoryEndpoint();
 
-            instance.write('TEST', endpoint => {
+        //     instance.write('TEST', endpoint => {
 
-                assert.isNull(endpoint);
+        //         assert.isNull(endpoint);
+        //         done();
+
+        //     });
+
+        // });
+
+        // it('can send if connected.', done => {
+
+        //     const plugin = new MemoryPlugin();
+        //     const server = new ServiceChassis(plugin);
+
+        //     server.listen({ channelName: 'channelName' }, endpoint => {
+
+        //         server.write('TEST', sendEndpoint => {
+
+        //             assert.isNull(sendEndpoint);
+
+        //             server.close(closeEndpoint => {
+
+        //                 assert.isNotNull(closeEndpoint);
+        //                 done();
+
+        //             });
+
+        //         });
+        //     });
+        // });
+
+        it('client to server', done => {
+            const mep = new MemoryEndpoint();
+            const server = mep.listen('cName');
+            const client = mep.connect('cName');
+            server.rxRecv.subscribe((data: any) => {
+                assert.equal('CTS', data);
                 done();
-
             });
+            client.rxSend.next('CTS');
 
         });
 
-        it('can send if connected.', done => {
+        it('echo it', done => {
+            const mep = new MemoryEndpoint();
+            const server = mep.listen('cName');
+            const client = mep.connect('cName');
 
-            const plugin = new MemoryPlugin();
-            const server = new ServiceChassis(plugin);
-
-            server.listen({ channelName: 'channelName' }, endpoint => {
-
-                server.write('TEST', sendEndpoint => {
-
-                    assert.isNull(sendEndpoint);
-
-                    server.close(closeEndpoint => {
-
-                        assert.isNotNull(closeEndpoint);
-                        done();
-
-                    });
-
-                });
+            server.rxRecv.subscribe((data: any) => {
+                assert.equal('PING', data);
+                server.rxSend.next(data);
             });
+            client.rxRecv.subscribe((data: any) => {
+                assert.equal('PING', data);
+                done();
+            });
+            client.rxSend.next('PING');
         });
 
-        it('can send to client and receive call back.', done => {
-
-            const plugin = new MemoryPlugin();
-            const server = new ServiceChassis(plugin);
-            const client = new ServiceChassis(plugin);
-
-            server.listen({ channelName: 'server' }, endpoint => {
-
-                assert.isNotNull(endpoint);
-
-                client.connect({ channelName: 'server' }, connectEndpoint => {
-
-                    assert.isNotNull(connectEndpoint);
-
-                    client.read(msg => {
-
-                        assert.equal(msg, 'TEST');
-
-                        client.write('GOTCHA', sendEndpoint => {
-
-                            assert.isNotNull(sendEndpoint);
-
-                        });
-
-                    });
-
-                    server.read( msg => {
-
-                        assert.equal(msg, 'GOTCHA');
-
-                        server.close(servercloseEndpoint => {
-
-                            assert.isNotNull(servercloseEndpoint, 'server close');
-
-                            client.close (clientCloseEndpoint => {
-
-                                assert.isNotNull(clientCloseEndpoint, 'client close');
-                                done();
-                            });
-                        });
-                    });
-
-                    server.write('TEST', serverSendEndpoint => {
-
-                        assert.isNotNull(serverSendEndpoint);
-
-                    });
-                });
+        it('server to client', done => {
+            const mep = new MemoryEndpoint();
+            const server = mep.listen('cName');
+            const client = mep.connect('cName');
+            client.rxRecv.subscribe((data: any) => {
+                assert.equal('PONG', data);
+                done();
             });
+            server.rxSend.next('PONG');
 
         });
     });

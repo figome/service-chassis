@@ -1,4 +1,4 @@
-import StreamPayload from '../src/msg-parser/stream-payload';
+import PayloadParser from '../my/payload-parser';
 import { assert } from 'chai';
 import { fragmentizeTwoSeparators, fragmentizeTwoEqualSeparators } from './hexler-helper';
 
@@ -7,7 +7,7 @@ describe('stream-payload', () => {
   it('find', (done) => {
     fragmentizeTwoSeparators().forEach((hexle) => {
       hexle.hexle.forEach(fragments => {
-        const sp = new StreamPayload('__BEGIN--', '_-END-_');
+        const sp = new PayloadParser('__BEGIN--', '_-END-_');
         let foundIdx = 0;
         fragments.forEach(fragment => {
           sp.feed(fragment, 0, (payload) => assert.equal(hexle.payload[foundIdx++], payload, fragment));
@@ -21,7 +21,7 @@ describe('stream-payload', () => {
   it('find with equal begin and end haystack', (done) => {
     fragmentizeTwoEqualSeparators().forEach((hexle) => {
       hexle.hexle.forEach(fragments => {
-        const sp = new StreamPayload('__SEP__', '__SEP__');
+        const sp = new PayloadParser('__SEP__', '__SEP__');
         let foundIdx = 0;
         fragments.forEach(fragment => {
           sp.feed(fragment, 0, (payload) => assert.equal(hexle.payload[foundIdx++], payload, fragment));

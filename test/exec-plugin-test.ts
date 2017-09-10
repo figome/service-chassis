@@ -1,79 +1,87 @@
-import ExecPlugin, { Param } from '../src/plugins/exec-plugin';
-import ServiceChassis, { BindCallback } from '../src/service-chassis';
-import Endpoint from '../src/endpoint';
+// import ExecPlugin, { Param } from '../src/plugins/exec-plugin';
+// import ServiceChassis, { BindCallback } from '../src/service-chassis';
+import RxEndpoint from '../my/rx-endpoint';
+import ExecEndpoint from '../my/exec-endpoint';
 
 import { assert } from 'chai';
 import * as path from 'path';
 
-function readAssert(server: ServiceChassis<Param>, done: any): void {
-
-    function flatten<T> (arr: T[][]): T[] {
-        return Array.prototype.concat(...arr);
-    }
-
-    const checkArray: string[] = [];
-
-    server.bind(data => {
-        checkArray.push(data);
-        if (data === null) {
-            assert.isNull(checkArray[checkArray.length - 1]);
-            assert.deepEqual(
-                flatten(checkArray.slice(0, -1).map(el => {
-                    return String(el).split('\n');
-                }))
-                    .filter( el => el !== '')
-                    .map(n => parseInt(n, 10)), [1, 2, 3, 4, 5, 6]
-            );
-
-            done();
-        }
-
-    }, data => {
-        assert.fail();
-        done();
-    });
-
+function readAssert(rxep: RxEndpoint, done: any): void {
+  function flatten<T>(arr: T[][]): T[] {
+    return Array.prototype.concat(...arr);
+  }
+  const checkArray: string[] = [];
+  rxep.rxRecv.subscribe(data => {
+    console.log('found', data);
+    checkArray.push(data);
+  }, data => {
+    assert.fail();
+    done();
+  }, () => {
+    assert.deepEqual(
+      flatten(checkArray.map(el => {
+        return String(el).split('\n');
+      }))
+        .filter(el => el !== '')
+        .map(n => parseInt(n, 10)), [1, 2, 3, 4, 5, 6]
+    );
+    done();
+  });
 }
 
 describe('exec plugin', () => {
 
-    describe('send/bind', () => {
-
-        it('can receive if spawned.', done => {
-
-            const plugin = new ExecPlugin();
-            const server = new Endpoint(plugin);
-
-            readAssert(server, done);
-
-            server.connect({
-                command: process.execPath,
-                argv: [ '-e', '[1, 2, 3, 4, 5, 6].forEach(el => console.log(el))' ]
-            }, endpoint => {/**/});
-
-        });
-
-        it('can send to client and receive call back.', done => {
-
-            const plugin = new ExecPlugin();
-            const server = new Endpoint(plugin);
-            const checkArray: string[] = [];
-
-            readAssert(server, done);
-
-            server.connect({
-                command: process.execPath,
-                argv: [ path.join('dist', 'test', '_test-subProcess.js') ]
-            }, endpoint => {
-                [1, 2, 3, 4, 5, 6].forEach( (el, index, all) => {
-                    server.write(`${el}\n`, serverSendEndpoint => {
-                       if (index == all.length - 1) {
-                           server.close(() => {/**/});
-                       }
-                    });
-                });
-            });
-
-        });
+  it('can error', done => {
+    const eep = new ExecEndpoint();
+    eep.rxRecv.subscribe((data: any) => {
+      assert.fail('never called');
+    }, (data) => {
+      assert.equal(data[0].code, 'ENOENT');
+      assert.equal(data[1].status, -2);
+    }, () => {
+      assert.equal(1, 1);
+      done();
     });
+    eep.command('/wtf/wtf');
+  });
+
+  it('can exit code', done => {
+    const eep = new ExecEndpoint();
+    eep.rxRecv.subscribe((data: any) => {
+      assert.fail('never called');
+    }, (data) => {
+      assert.equal(data[0].status, 47);
+    }, () => {
+      done();
+    });
+    eep.command(process.execPath, ['-e', 'process.exit(47)']);
+  });
+
+  it('can receive if spawned.', done => {
+
+    const eep = new ExecEndpoint();
+    readAssert(eep, done);
+    eep.command(
+      process.execPath,
+      ['-e', '[1, 2, 3, 4, 5, 6].forEach(el => console.log(el))']);
+  });
+
+  it.only('can span a echo server', done => {
+    const eep = new ExecEndpoint();
+    const checkArray: string[] = [];
+
+    readAssert(eep, () => {
+      console.log('complete my side');
+      done();
+    });
+
+    eep.command(process.execPath,
+      [path.join('dist', 'test', 'echo-process.js')]);
+
+    [1, 2, 3, 4, 5, 6].forEach((el) => {
+      eep.rxSend.next(`${el}\n`);
+    });
+    eep.rxSend.complete();
+  });
+
 });

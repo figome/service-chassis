@@ -4,27 +4,40 @@ import PayloadParser from './payload-parser';
 import * as stream from 'stream';
 import { spawn, ChildProcess } from 'child_process';
 
-export function ExecEndpoint(command: string, argv: string[] = [], killTimeout = 500): RxEndpoint {
-  let subProcess: ChildProcess = spawn(command, argv);
-
-  return new RxEndpoint()
-    .send((data: any, rxs: rx.Subject<any>) => {
-      subProcess.stdout.on('data', (_data) => {
-        rxs.next(_data);
-      });
-      subProcess.on('close', (status, signal) => {
-        // rxs.complete();
-        // endpoint.bounded.forEach(bound => bound(null, status, signal));
-      });
-      subProcess.on('error', (_data: any) => {
-        // endpoint.boundedError.forEach(bound => bound(data));
-     });
-    })
-    .recv((data: any, rxs: rx.Subject<any>) => {
-      subProcess.stdin.write(data, () => {
-        rxs.next(data);
+export class ExecEndpoint extends RxEndpoint {
+  private subProcess: ChildProcess;
+  constructor() {
+    super();
+  }
+  public command(command: string, argv: string[] = [], killTimeout = 500): void {
+    this.subProcess = spawn(command, argv);
+    const errorStack: any[] = [];
+    this.subProcess.stdout.on('data', (_data) => {
+      // console.log('STDIN:', _data);
+      this.rxRecv.next((_data as Buffer).toString('utf-8'));
+    });
+    this.rxSend.subscribe(null, null, () => {
+      this.subProcess.stdin.end(() => {
+        setTimeout(() => {
+          this.subProcess.kill();
+        }, killTimeout);
       });
     });
+    this.subProcess.on('close', (status, signal) => {
+      if (status != 0) {
+        this.rxSend.error(errorStack.concat({ status: status, signal: signal }));
+        this.rxRecv.error(errorStack.concat({ status: status, signal: signal }));
+      } else if (errorStack.length) {
+        this.rxSend.error(errorStack);
+        this.rxRecv.error(errorStack);
+      }
+      this.rxSend.complete();
+      this.rxRecv.complete();
+    });
+    this.subProcess.on('error', (_data: any) => {
+      errorStack.push(_data);
+    });
+  }
 }
 
 export default ExecEndpoint;
