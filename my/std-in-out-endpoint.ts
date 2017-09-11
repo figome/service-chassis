@@ -1,23 +1,29 @@
 
-import * as rx from './urxjs';
-import RxEndpoint from './rx-endpoint';
+import * as rx from 'rxjs';
 import PayloadParser from './payload-parser';
 
-export function StdInOutEndpoint(): RxEndpoint {
-  const rxe = new RxEndpoint()
-    .recv((_: any, rxs: rx.Subject<any>) => {
-      // console.log('receive:', _);
-      process.stdout.write(_.toString());
-      // rxs.next(_);
-    });
+export class StdInOutEndpoint {
+  public input: rx.Observable<string>;
+  public output: rx.Subject<string>;
 
-  process.stdin.on('data', stuff => {
-    rxe.rxRecv.next(stuff);
-  });
-  process.stdin.on('close', () => {
-    process.exit(47);
-  });
-  return rxe;
+  constructor() {
+    this.input = rx.Observable.create((observer: rx.Observer<string>) => {
+      process.stdin.on('data', stuff => {
+        // console.log('got:', stuff);
+        observer.next(stuff.toString('utf-8'));
+      });
+      process.stdin.on('error', (error: any) => {
+        observer.error(error);
+      });
+      process.stdin.on('close', () => {
+        // console.log('close:');
+        observer.complete();
+        process.exit(0);
+      });
+    });
+    this.output = new rx.Subject();
+    this.output.subscribe((a) => process.stdout.write(a));
+  }
 }
 
 export default StdInOutEndpoint;

@@ -1,56 +1,56 @@
-import * as rx from './urxjs';
-import RxEndpoint from './rx-endpoint';
+import * as rx from 'rxjs';
 import PayloadParser from './payload-parser';
 import * as stream from 'stream';
 import { spawn, ChildProcess } from 'child_process';
+import RxEndpoint from './rx-endpoint';
 
-export class ExecEndpoint extends RxEndpoint {
+export class ExecEndpoint implements RxEndpoint<string> {
   private subProcess: ChildProcess;
-  constructor() {
-    super();
+  private killTimeout: number;
+  private command: string;
+  private argv: string[];
+
+  public input: rx.Subject<string>;
+  public output: rx.Subject<string>;
+
+  public static command(command: string, argv: string[] = [], killTimeout = 500): ExecEndpoint {
+    return new ExecEndpoint(command, argv, killTimeout);
   }
-  public command(command: string, argv: string[] = [], killTimeout = 500): void {
-    this.subProcess = spawn(command, argv);
-    const errorStack: any[] = [];
-    this.subProcess.stdout.on('data', (_data) => {
-      // console.log('STDIN:', _data);
-      this.rxRecv.next((_data as Buffer).toString('utf-8'));
-    });
-    this.rxSend.subscribe(null, null, () => {
-      this.subProcess.stdin.end(() => {
-        setTimeout(() => {
-          this.subProcess.kill();
-        }, killTimeout);
+
+  constructor(command: string, argv: string[], killTimeout: number) {
+    this.command = command;
+    this.argv = argv;
+    this.killTimeout = killTimeout;
+    this.input = rx.Observable.create((observer: rx.Observer<string>) => {
+      const errorStack: any[] = [];
+      this.subProcess = spawn(this.command, this.argv);
+      this.subProcess.stdout.on('data', stuff => {
+        observer.next('' + stuff);
+      });
+      this.subProcess.stdout.on('error', (error: any) => {
+        observer.error(error);
+      });
+      this.subProcess.on('close', (status, signal) => {
+        if (status != 0) {
+          observer.error(errorStack.concat({ status: status, signal: signal }));
+        } else if (errorStack.length) {
+          observer.error(errorStack);
+        } else {
+          observer.complete();
+        }
+      });
+      this.subProcess.on('error', (_data: any) => {
+        errorStack.push(_data);
       });
     });
-    this.subProcess.on('close', (status, signal) => {
-      if (status != 0) {
-        this.rxSend.error(errorStack.concat({ status: status, signal: signal }));
-        this.rxRecv.error(errorStack.concat({ status: status, signal: signal }));
-      } else if (errorStack.length) {
-        this.rxSend.error(errorStack);
-        this.rxRecv.error(errorStack);
-      }
-      this.rxSend.complete();
-      this.rxRecv.complete();
-    });
-    this.subProcess.on('error', (_data: any) => {
-      errorStack.push(_data);
-    });
+    this.output = new rx.Subject();
+    this.output.subscribe(
+      (a) => { this.subProcess.stdin.write(a); },
+      (e) => { /* */ },
+      () => { this.subProcess.stdin.end(); }
+    );
   }
+
 }
 
 export default ExecEndpoint;
-
-  // public close(param: Param, endpoint: ServiceChassis<Param>, cb: Callback<Param>): void {
-
-  //   this.toSubProcess.end(() => {
-  //     setTimeout(() => {
-
-  //       this.subProcess.kill();
-  //       cb(endpoint);
-
-  //     }, this.killTimeout);
-  //   });
-
-  // }

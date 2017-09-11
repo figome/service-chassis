@@ -45,6 +45,7 @@
   "dependencies": {
     "@types/winston": ">=0.0.32",
     "rxjs": "^5.4.3",
+    "ts-node": "^3.3.0",
     "winston": ">=2.2.0"
   },
   "publishConfig": {

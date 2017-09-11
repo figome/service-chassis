@@ -1,18 +1,29 @@
-import * as rx from './urxjs';
-import RxEndpoint from './rx-endpoint';
+import * as rx from 'rxjs';
 import PayloadParser from './payload-parser';
+import RxEndpoint from './rx-endpoint';
 
-export function FindLastEndpoint(first: string, last: string): RxEndpoint {
-    const payLoadParser = new PayloadParser(first, last);
-    return new RxEndpoint()
-        .send((data: any, rxs: rx.Subject<any>) => {
-            payLoadParser.feed(data, 0, (payload) => {
-                rxs.next(payload);
-            });
-        })
-        .recv((data: any, rxs: rx.Subject<any>) => {
-            rxs.next(`${payLoadParser.first}${data}${payLoadParser.last}`);
+export class FindLastEndpoint implements RxEndpoint<string> {
+
+    private payloadParser: PayloadParser;
+    public input: rx.Subject<string>;
+    public output: rx.Subject<string>;
+
+    constructor(first: string, last: string, down: RxEndpoint<string>) {
+        this.payloadParser = new PayloadParser(first, last);
+        this.output = new rx.Subject();
+        this.output.subscribe((data) => {
+            console.log('down.output:', data);
+            down.output.next(`${this.payloadParser.first}${data}${this.payloadParser.last}`);
         });
+        this.input = new rx.Subject();
+        down.input.subscribe(data => {
+            console.log('down.input:', data);
+            this.payloadParser.feed(data, 0, (payload) => {
+                 this.input.next(payload);
+            });
+        });
+    }
+
 }
 
 export default FindLastEndpoint;

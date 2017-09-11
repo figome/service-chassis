@@ -1,29 +1,36 @@
-// import { assert } from 'chai';
+import { assert } from 'chai';
 // import * as path from 'path';
 
 // // import Endpoint from '../src/endpoint';
 // // import NestedEndpoint from '../src/nested-endpoint';
 
 // // import { Message } from '../src/msg-parser/message';
-// import ExecPlugin from '../src/plugins/exec-plugin';
+ import ExecEndpoint from '../my/exec-endpoint';
+ import FirstLastEndpoint from '../my/first-last-endpoint';
+ import * as path from 'path';
+
 // import ReflectorPlugin from '../src/plugins/reflector-plugin';
 // import PayloadParserPlugin from '../src/plugins/payload-parser-plugin';
 // import PayloadParser from '../my/payload-parser';
 // import DebugPlugin from '../my/debug-endpoint';
 
-// describe('message parser', () => {
-//     describe('write', () => {
-//         it('encapsulates a given message with a separator.', done => {
-//             const separator = '__SEP__';
-//             const message = new Message(separator);
-//             const testDataWithData = 'someData';
+describe('first-last messages', () => {
+    it('', done => {
+        const eep = ExecEndpoint.command(process.execPath,
+            [path.join('dist', 'test', 'echo-process.js')]);
+        const flep = new FirstLastEndpoint('__BEG__', '__END__', eep);
 
-//             assert.equal(
-//                 message.encapsulate(testDataWithData),
-//                 `${separator}${testDataWithData}${separator}`
-//             );
-//             done();
-//         });
+        let count = 0;
+        flep.input.subscribe(
+            (data) => { ++count; assert.equal('Hello World', data); },
+            (error) => { assert.fail(); },
+            () => { assert.equal(count, 4); done(); });
+        flep.output.next('Hello World');
+        flep.output.next('Hello World');
+        flep.output.next('Hello World');
+        flep.output.next('Hello World');
+        flep.output.complete();
+    });
 
 //         it('encapsulates a given message with a separator, even if empty.', done => {
 //             const separator = '__SEP__';
@@ -102,4 +109,4 @@
 //             });
 //         });
 //     });
-// });
+});

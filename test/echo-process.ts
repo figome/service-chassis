@@ -1,7 +1,7 @@
 import StdInOutEndpoint from '../my/std-in-out-endpoint';
 
-const sioep = StdInOutEndpoint();
+const sioep = new StdInOutEndpoint();
 
-sioep.rxSend.subscribe(data => {
-    sioep.rxRecv.next(data);
+sioep.input.subscribe((data: string) => {
+    sioep.output.next(data);
 });

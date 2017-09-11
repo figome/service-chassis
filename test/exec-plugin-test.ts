@@ -1,22 +1,21 @@
 // import ExecPlugin, { Param } from '../src/plugins/exec-plugin';
 // import ServiceChassis, { BindCallback } from '../src/service-chassis';
-import RxEndpoint from '../my/rx-endpoint';
+// import RxEndpoint from '../my/rx-endpoint';
 import ExecEndpoint from '../my/exec-endpoint';
 
 import { assert } from 'chai';
 import * as path from 'path';
 
-function readAssert(rxep: RxEndpoint, done: any): void {
+function readAssert(rxep: ExecEndpoint, done: any): void {
   function flatten<T>(arr: T[][]): T[] {
     return Array.prototype.concat(...arr);
   }
   const checkArray: string[] = [];
-  rxep.rxRecv.subscribe(data => {
-    console.log('found', data);
+  rxep.input.subscribe(data => {
+    // console.log('found', data);
     checkArray.push(data);
-  }, data => {
-    assert.fail();
-    done();
+  }, (error) => {
+    assert.fail('ERROR should not received');
   }, () => {
     assert.deepEqual(
       flatten(checkArray.map(el => {
@@ -32,56 +31,56 @@ function readAssert(rxep: RxEndpoint, done: any): void {
 describe('exec plugin', () => {
 
   it('can error', done => {
-    const eep = new ExecEndpoint();
-    eep.rxRecv.subscribe((data: any) => {
+    const eep = ExecEndpoint.command('/wtf/wtf');
+    eep.input.subscribe((data: any) => {
       assert.fail('never called');
-    }, (data) => {
-      assert.equal(data[0].code, 'ENOENT');
-      assert.equal(data[1].status, -2);
-    }, () => {
-      assert.equal(1, 1);
+    }, (error) => {
+      assert.equal((error[0] as any).code, 'ENOENT');
+      assert.equal((error[1] as any).status, -2);
       done();
+    }, () => {
+      assert.fail('never called');
     });
-    eep.command('/wtf/wtf');
+    // eep.exec();
   });
 
   it('can exit code', done => {
-    const eep = new ExecEndpoint();
-    eep.rxRecv.subscribe((data: any) => {
+    const eep = ExecEndpoint.command(process.execPath, ['-e', 'process.exit(47)']);
+    eep.input.subscribe((data: any) => {
       assert.fail('never called');
     }, (data) => {
-      assert.equal(data[0].status, 47);
-    }, () => {
+      assert.equal((data[0] as any).status, 47);
       done();
+    }, () => {
+      assert.fail('never called');
     });
-    eep.command(process.execPath, ['-e', 'process.exit(47)']);
+    // eep.exec();
   });
 
   it('can receive if spawned.', done => {
 
-    const eep = new ExecEndpoint();
-    readAssert(eep, done);
-    eep.command(
+    const eep = ExecEndpoint.command(
       process.execPath,
       ['-e', '[1, 2, 3, 4, 5, 6].forEach(el => console.log(el))']);
+    readAssert(eep, done);
+    // eep.exec();
   });
 
-  it.only('can span a echo server', done => {
-    const eep = new ExecEndpoint();
+  it('can span a echo server', done => {
+    const eep = ExecEndpoint.command(process.execPath,
+      [path.join('dist', 'test', 'echo-process.js')]);
     const checkArray: string[] = [];
 
     readAssert(eep, () => {
-      console.log('complete my side');
+      // console.log('complete my side');
       done();
     });
-
-    eep.command(process.execPath,
-      [path.join('dist', 'test', 'echo-process.js')]);
+    // eep.exec();
 
     [1, 2, 3, 4, 5, 6].forEach((el) => {
-      eep.rxSend.next(`${el}\n`);
+      eep.output.next(`${el}\n`);
     });
-    eep.rxSend.complete();
+    eep.output.complete();
   });
 
 });
