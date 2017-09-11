@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import MemoryEndpoint from '../my/memory-endpoint';
+import MemoryEndpoint from '../src/memory-endpoint';
 
 // import ServiceChassis from '../src/endpoint';
 // import MemoryPlugin from '../src/plugins/memory-plugin';

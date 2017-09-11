@@ -5,8 +5,8 @@ import { assert } from 'chai';
 // // import NestedEndpoint from '../src/nested-endpoint';
 
 // // import { Message } from '../src/msg-parser/message';
-import ExecEndpoint from '../my/exec-endpoint';
-import FirstLastEndpoint from '../my/first-last-endpoint';
+import ExecEndpoint from '../src/exec-endpoint';
+import FirstLastEndpoint from '../src/first-last-endpoint';
 import * as path from 'path';
 
 // import ReflectorPlugin from '../src/plugins/reflector-plugin';

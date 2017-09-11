@@ -1,4 +1,4 @@
-import PayloadParser from '../my/payload-parser';
+import PayloadParser from '../src/payload-parser';
 import { assert } from 'chai';
 import { fragmentizeTwoSeparators, fragmentizeTwoEqualSeparators } from './hexler-helper';
 

@@ -1,7 +1,7 @@
 // import ExecPlugin, { Param } from '../src/plugins/exec-plugin';
 // import ServiceChassis, { BindCallback } from '../src/service-chassis';
 // import RxEndpoint from '../my/rx-endpoint';
-import ExecEndpoint from '../my/exec-endpoint';
+import ExecEndpoint from '../src/exec-endpoint';
 
 import { assert } from 'chai';
 import * as path from 'path';

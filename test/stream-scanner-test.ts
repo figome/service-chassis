@@ -1,4 +1,4 @@
-import StreamScanner from '../my/stream-scanner';
+import StreamScanner from '../src/stream-scanner';
 import { assert } from 'chai';
 import { fragmentizeOneSeparator } from './hexler-helper';
 
