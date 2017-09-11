@@ -1,4 +1,4 @@
-import * as rx from './urxjs';
+import * as rx from './abstract-rx';
 import PayloadParser from './payload-parser';
 import * as stream from 'stream';
 import { spawn, ChildProcess } from 'child_process';

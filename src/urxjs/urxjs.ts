@@ -1,21 +1,16 @@
 
-interface DataCallback {
-  (data: any): void;
-}
-
-interface CompletesCallback {
-  (): void;
-}
+import * as abstractRx from '../abstract-rx';
 
 export class Subject<T> {
-  private subscribes: DataCallback[];
-  private completes: CompletesCallback[];
-  private errors: DataCallback[];
+  private subscribes: abstractRx.DataCallback[];
+  private completes: abstractRx.CompletesCallback[];
+  private errors: abstractRx.DataCallback[];
 
   constructor() {
     this.subscribes = [];
     this.completes = [];
     this.errors = [];
+    // console.log('iam urxjs');
   }
   public complete(): void {
     const cmplts = this.completes;

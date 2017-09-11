@@ -1,4 +1,7 @@
+import * as rx from '../src/abstract-rx';
 import StdInOutEndpoint from '../src/std-in-out-endpoint';
+
+rx.inject();
 
 const sioep = new StdInOutEndpoint();
 

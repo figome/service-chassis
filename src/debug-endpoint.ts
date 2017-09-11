@@ -1,5 +1,5 @@
 
-import * as rx from './urxjs';
+import * as rx from './abstract-rx';
 import PayloadParser from './payload-parser';
 
 export class DebugEndpoint extends rx.Subject<any> {
