@@ -1,7 +1,6 @@
 language: node_js
 #sudo: required
 node_js:
-    - "0.10"
     - "6"
 
 dist: trusty
@@ -9,4 +8,8 @@ dist: trusty
 script:
     - npm install
     - npm run lint
+    - npm test
+    - rm -rf node_modules/
+    - nvm use 0.10
+    - npm install
     - npm test
