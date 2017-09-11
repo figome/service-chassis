@@ -17,7 +17,7 @@ export class Subject<T> {
     this.completes = [];
     cmplts.forEach(cb => cb());
   }
-  public next(data: any): void {
+  public next(data: T): void {
     this.subscribes.forEach(cb => cb(data));
   }
   public error(data: any): void {
@@ -26,7 +26,7 @@ export class Subject<T> {
     this.completes = [];
     errs.forEach(cb => cb(data));
   }
-  public subscribe(cb: (data: any) => void, error?: (data: any) => void, complete?: () => void): void {
+  public subscribe(cb: (data: T) => void, error?: (data: any) => void, complete?: () => void): void {
     if (cb) { this.subscribes.push(cb); }
     if (error) { this.errors.push(error); }
     if (complete) { this.completes.push(complete); }

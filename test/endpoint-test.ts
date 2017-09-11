@@ -175,7 +175,6 @@ import * as rx from '../src/abstract-rx';
 
         // });
 
-
         // it('cannot send if not connected.', done => {
 
         //     const plugin = new MemoryEndpoint();

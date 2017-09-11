@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/src/endpoint.js",
   "engines": {
-    "node": ">=6.11.2"
+    "node": ">=0.10"
   },
   "scripts": {
     "clean": "rimraf dist",
@@ -43,7 +43,9 @@
     "typescript": ">=2.1.5"
   },
   "dependencies": {
+    "@types/es6-shim": "^0.31.35",
     "@types/winston": ">=0.0.32",
+    "es6-shim": "^0.35.3",
     "rxjs": "^5.4.3",
     "ts-node": "^3.3.0",
     "winston": ">=2.2.0"

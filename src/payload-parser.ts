@@ -4,9 +4,6 @@ interface Step {
     pos: number;
     step: State;
 }
-interface StepCB {
-    (step: Step): void;
-}
 
 interface StringPos {
     start?: number;

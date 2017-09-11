@@ -1,6 +1,5 @@
 
 import * as rx from './abstract-rx';
-import PayloadParser from './payload-parser';
 
 export class StdInOutEndpoint {
   public input: rx.Observable<string>;

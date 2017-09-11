@@ -9,15 +9,18 @@ import * as path from 'path';
 
 function readAssert(rxep: ExecEndpoint, done: any): void {
   function flatten<T>(arr: T[][]): T[] {
-    return Array.prototype.concat(...arr);
+    const tmp = Array.prototype.concat(...arr);
+    // console.log('flatten:', arr, tmp);
+    return tmp;
   }
   const checkArray: string[] = [];
   rxep.input.subscribe(data => {
     // console.log('found', data);
     checkArray.push(data);
   }, (error) => {
-    assert.fail('ERROR should not received');
+    assert.fail('ERROR should not received', error);
   }, () => {
+    // console.log('>>>>>>', checkArray);
     assert.deepEqual(
       flatten(checkArray.map(el => {
         return String(el).split('\n');
@@ -42,8 +45,12 @@ function readAssert(rxep: ExecEndpoint, done: any): void {
       eep.input.subscribe((data: any) => {
         assert.fail('never called');
       }, (error) => {
+        // console.log(error);
         assert.equal((error[0] as any).code, 'ENOENT');
-        assert.equal((error[1] as any).status, -2);
+        const status = (error[1] as any).status;
+        // node 6 return -2
+        // node 0.10 return -1
+        assert.isTrue(status < 0);
         done();
       }, () => {
         assert.fail('never called');
@@ -68,7 +75,7 @@ function readAssert(rxep: ExecEndpoint, done: any): void {
 
       const eep = ExecEndpoint.command(
         process.execPath,
-        ['-e', '[1, 2, 3, 4, 5, 6].forEach(el => console.log(el))']);
+        ['-e', '[1, 2, 3, 4, 5, 6].forEach(function(el) { console.log(el); })']);
       readAssert(eep, done);
       // eep.exec();
     });
@@ -76,7 +83,6 @@ function readAssert(rxep: ExecEndpoint, done: any): void {
     it('can span a echo server', done => {
       const eep = ExecEndpoint.command(process.execPath,
         [path.join('dist', 'test', 'echo-process.js')]);
-      const checkArray: string[] = [];
 
       readAssert(eep, () => {
         // console.log('complete my side');

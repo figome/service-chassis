@@ -1,4 +1,6 @@
 
+import { Map } from 'es6-shim';
+
 interface Hexle {
   findCount: number;
   payload: string[];

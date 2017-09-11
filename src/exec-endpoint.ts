@@ -1,6 +1,4 @@
 import * as rx from './abstract-rx';
-import PayloadParser from './payload-parser';
-import * as stream from 'stream';
 import { spawn, ChildProcess } from 'child_process';
 import RxEndpoint from './rx-endpoint';
 
@@ -32,7 +30,10 @@ export class ExecEndpoint implements RxEndpoint<string> {
         observer.error(error);
       });
       this.subProcess.on('close', (status, signal) => {
-        if (status != 0) {
+        // node 6+ returns status zero
+        // node 0.10 returns status 8 and signal null
+        // || (status == 8 && signal == null))
+        if (!(status == 0)) {
           observer.error(errorStack.concat({ status: status, signal: signal }));
         } else if (errorStack.length) {
           observer.error(errorStack);

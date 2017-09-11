@@ -1,5 +1,5 @@
+import { Map } from 'es6-shim';
 import * as rx from './abstract-rx';
-import PayloadParser from './payload-parser';
 
 export class Connection {
 
