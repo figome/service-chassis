@@ -25,6 +25,7 @@ export class ExecEndpoint implements RxEndpoint<string> {
       const errorStack: any[] = [];
       this.subProcess = spawn(this.command, this.argv);
       this.subProcess.stdout.on('data', stuff => {
+        // console.log(`exec <- ${stuff}`);
         observer.next('' + stuff);
       });
       this.subProcess.stdout.on('error', (error: any) => {
@@ -45,9 +46,14 @@ export class ExecEndpoint implements RxEndpoint<string> {
     });
     this.output = new rx.Subject();
     this.output.subscribe(
-      (a) => { this.subProcess.stdin.write(a); },
+      (a) => {
+        // console.log(`exec -> ${a}`);
+        this.subProcess.stdin.write(a);
+      },
       (e) => { /* */ },
-      () => { this.subProcess.stdin.end(); }
+      () => {
+        this.subProcess.stdin.end();
+      }
     );
   }
 
