@@ -1,5 +1,5 @@
 
-import * as rx from 'rxjs';
+import * as rx from './urxjs';
 import PayloadParser from './payload-parser';
 
 export class StdInOutEndpoint {

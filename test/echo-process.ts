@@ -6,6 +6,6 @@ sioep.input.subscribe((data: string) => {
     if (data.indexOf('__BEG__CORE__END__') >= 0) {
         process.exit(66);
     } else {
-        sioep.output.next(data + 'WIRD');
+        sioep.output.next(data);
     }
 });

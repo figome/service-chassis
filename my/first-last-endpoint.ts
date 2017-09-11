@@ -1,4 +1,4 @@
-import * as rx from 'rxjs';
+import * as rx from './urxjs';
 import PayloadParser from './payload-parser';
 import RxEndpoint from './rx-endpoint';
 

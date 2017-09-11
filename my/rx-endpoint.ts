@@ -1,4 +1,4 @@
-import * as rx from 'rxjs';
+import * as rx from './urxjs';
 
 interface RxEndpoint<T> {
   input: rx.Subject<T>;
