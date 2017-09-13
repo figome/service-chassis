@@ -49,7 +49,7 @@
     "winston": ">=2.2.0"
   },
   "publishConfig": {
-    "tag": "next"
+    "tag": "latest"
   },
   "config": {
     "commitizen": {
