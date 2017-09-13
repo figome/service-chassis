@@ -1,6 +1,6 @@
 {
   "name": "communimon",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Communication interface for different endpoints.",
   "main": "dist/src/abstract-rx.js",
   "types": "dist/src/abstract-rx.d.ts",
@@ -19,7 +19,7 @@
     "preversion": "npm test",
     "version": "conventional-changelog -p angular -v -r 0 > CHANGELOG.md && git add .",
     "postversion": "git push && git push --tags",
-    "prepare": "not-in-install && npm run build || echo 'In install cycle, skipping prepublish'"
+    "prepare": "npm run build"
   },
   "contributors": [
     "Robert Docter <mail@antlike.tech>"
