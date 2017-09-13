@@ -1,6 +1,6 @@
 {
   "name": "communimon",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Communication interface for different endpoints.",
   "main": "dist/src/abstract-rx.js",
   "types": "dist/src/abstract-rx.d.ts",
