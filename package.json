@@ -1,8 +1,9 @@
 {
-  "name": "service-chassis",
-  "version": "0.1.0",
-  "description": "",
-  "main": "dist/src/endpoint.js",
+  "name": "communimon",
+  "version": "0.1.1",
+  "description": "Communication interface for different endpoints.",
+  "main": "dist/src/abstract-rx.js",
+  "types": "dist/src/abstract-rx.d.ts",
   "engines": {
     "node": ">=0.10"
   },
@@ -18,7 +19,7 @@
     "preversion": "npm test",
     "version": "npm run build && conventional-changelog -p angular -v -r 0 > CHANGELOG.md && git add -A .",
     "postversion": "git push && git push --tags",
-    "prepublish": "not-in-install && npm run build || echo 'In install cycle, skipping prepublish'"
+    "prepare": "not-in-install && npm run build || echo 'In install cycle, skipping prepublish'"
   },
   "contributors": [
     "Robert Docter <mail@antlike.tech>"
@@ -34,10 +35,10 @@
   "homepage": "https://github.com/thegitm8/service-chassis#readme",
   "devDependencies": {
     "@types/chai": "^4.0.3",
-    "@types/mocha": ">=2.2.33",
+    "@types/mocha": "^2.2.43",
     "chai": "^4.1.1",
-    "mocha": ">=2.5.3",
-    "rimraf": "^2.6.1",
+    "mocha": "^3.5.3",
+    "rimraf": "^2.6.2",
     "tsc-watch": "^1.0.7",
     "tslint": "^5.6.0",
     "typescript": ">=2.1.5"
@@ -46,6 +47,7 @@
     "@types/es6-shim": "^0.31.35",
     "@types/winston": ">=0.0.32",
     "es6-shim": "^0.35.3",
+    "message-payload-parser": "^0.1.1",
     "rxjs": "^5.4.3",
     "ts-node": "^3.3.0",
     "winston": ">=2.2.0"
