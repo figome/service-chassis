@@ -1,3 +1,3 @@
-# service-chassis
-Wrapper for service plugins
+# communimon
+Communication interface for different endpoints.
 
