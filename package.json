@@ -1,6 +1,6 @@
 {
   "name": "communimon",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Communication interface for different endpoints.",
   "main": "dist/src/abstract-rx.js",
   "types": "dist/src/abstract-rx.d.ts",
@@ -17,7 +17,7 @@
     "test": "mocha dist/test/*-test.js",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -w",
     "preversion": "npm test",
-    "version": "npm run build && conventional-changelog -p angular -v -r 0 > CHANGELOG.md && git add -A .",
+    "version": "conventional-changelog -p angular -v -r 0 > CHANGELOG.md && git add .",
     "postversion": "git push && git push --tags",
     "prepare": "not-in-install && npm run build || echo 'In install cycle, skipping prepublish'"
   },
@@ -26,13 +26,13 @@
   ],
   "repository": {
     "type": "git",
-    "url": "thegitm8/service-chassis"
+    "url": "thegitm8/communimon"
   },
   "license": "AFL-2.0",
   "bugs": {
-    "url": "https://github.com/thegitm8/service-chassis/issues"
+    "url": "https://github.com/thegitm8/communimon/issues"
   },
-  "homepage": "https://github.com/thegitm8/service-chassis#readme",
+  "homepage": "https://github.com/thegitm8/communimon#readme",
   "devDependencies": {
     "@types/chai": "^4.0.3",
     "@types/mocha": "^2.2.43",
