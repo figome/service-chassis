@@ -17,7 +17,6 @@
     "test": "mocha dist/test/*-test.js",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -w",
     "preversion": "npm test",
-    "version": "conventional-changelog -p angular -v -r 0 > CHANGELOG.md && git add .",
     "postversion": "git push && git push --tags",
     "prepare": "npm run build"
   },
