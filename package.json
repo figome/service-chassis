@@ -1,6 +1,6 @@
 {
   "name": "communimon",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Communication interface for different endpoints.",
   "main": "dist/src/abstract-rx.js",
   "types": "dist/src/abstract-rx.d.ts",
@@ -24,10 +24,6 @@
   "contributors": [
     "Robert Docter <mail@antlike.tech>"
   ],
-  "repository": {
-    "type": "git",
-    "url": "thegitm8/communimon"
-  },
   "license": "AFL-2.0",
   "bugs": {
     "url": "https://github.com/thegitm8/communimon/issues"
