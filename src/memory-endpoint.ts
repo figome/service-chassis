@@ -50,26 +50,3 @@ export class MemoryEndpoint {
 }
 
 export default MemoryEndpoint;
-
-//     public close(param: Param, endpoint: ServiceChassis<Param>, cb: Callback<Param>): void {
-
-//         this.serviceMap.delete(param.channelName);
-//         cb(endpoint);
-
-//     }
-
-//     public read(data: any, param: Param, endpoint: ServiceChassis<Param>, cb: Callback<Param>): void {
-
-//         const endpointToSendTo = this.serviceMap.get(param.channelName).find((i) => endpoint !== i);
-
-//         if (!endpointToSendTo) {
-//             cb(null);
-//             return;
-//         }
-
-//         endpointToSendTo.bounded.forEach( bound => bound(data) );
-
-//         cb(endpoint);
-
-//     }
-// }

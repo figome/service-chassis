@@ -1,5 +1,5 @@
 import * as rx from './abstract-rx';
-import PayloadParser from './payload-parser';
+import PayloadParser from 'message-payload-parser';
 import RxEndpoint from './rx-endpoint';
 
 export class FindLastEndpoint implements RxEndpoint<string> {

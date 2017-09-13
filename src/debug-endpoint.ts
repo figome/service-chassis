@@ -1,4 +1,3 @@
-
 import * as rx from './abstract-rx';
 
 export class DebugEndpoint extends rx.Subject<any> {
@@ -9,32 +8,6 @@ export class DebugEndpoint extends rx.Subject<any> {
         dep.attached = attach;
         return dep;
     }
-
-    // public subscribe(): rx.Subscription {
-    //     return this.attached.subscribe();
-    // }
-    // public subscribe(observer: rx.PartialObserver<any>): rx.Subscription {
-    //     return this.attached.subscribe(observer);
-    // }
-    // subscribe(next?: (value: T) => void, error?: (error: any) => void, complete?: () => void): Subscription;
-
-    // public subscribe(next?: (data: any) => void, error?: (error: any) => void,
-    //     complete?: () => void): rx.Subscription {
-    //     return this.attached.subscribe((data: any) => {
-    //         console.log(`DebugEndpoint:subscribe:cb:[${data}]`);
-    //         next(data);
-    //     }, (data: any) => {
-    //         if (error) {
-    //             console.log(`DebugEndpoint:subscribe:error:[${data}]`);
-    //             error(data);
-    //         }
-    //     }, () => {
-    //         if (complete) {
-    //             console.log(`DebugEndpoint:subscribe:complete:`);
-    //             complete();
-    //         }
-    //     });
-    // }
 
     public next(data: string): void {
         console.log(`DebugEndpoint:next:[${data}]`);

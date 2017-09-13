@@ -1,6 +1,3 @@
-// import ExecPlugin, { Param } from '../src/plugins/exec-plugin';
-// import ServiceChassis, { BindCallback } from '../src/service-chassis';
-// import RxEndpoint from '../my/rx-endpoint';
 import ExecEndpoint from '../src/exec-endpoint';
 import * as rx from '../src/abstract-rx';
 
@@ -10,17 +7,14 @@ import * as path from 'path';
 function readAssert(rxep: ExecEndpoint, done: any): void {
   function flatten<T>(arr: T[][]): T[] {
     const tmp = Array.prototype.concat(...arr);
-    // console.log('flatten:', arr, tmp);
     return tmp;
   }
   const checkArray: string[] = [];
   rxep.input.subscribe(data => {
-    // console.log('found', data);
     checkArray.push(data);
   }, (error) => {
     assert.fail('ERROR should not received', error);
   }, () => {
-    // console.log('>>>>>>', checkArray);
     assert.deepEqual(
       flatten(checkArray.map(el => {
         return String(el).split('\n');
@@ -45,7 +39,6 @@ function readAssert(rxep: ExecEndpoint, done: any): void {
       eep.input.subscribe((data: any) => {
         assert.fail('never called');
       }, (error) => {
-        // console.log(error);
         assert.equal((error[0] as any).code, 'ENOENT');
         const status = (error[1] as any).status;
         // node 6 return -2
@@ -55,7 +48,6 @@ function readAssert(rxep: ExecEndpoint, done: any): void {
       }, () => {
         assert.fail('never called');
       });
-      // eep.exec();
     });
 
     it('can exit code', done => {
@@ -68,7 +60,6 @@ function readAssert(rxep: ExecEndpoint, done: any): void {
       }, () => {
         assert.fail('never called');
       });
-      // eep.exec();
     });
 
     it('can receive if spawned.', done => {
@@ -77,7 +68,6 @@ function readAssert(rxep: ExecEndpoint, done: any): void {
         process.execPath,
         ['-e', '[1, 2, 3, 4, 5, 6].forEach(function(el) { console.log(el); })']);
       readAssert(eep, done);
-      // eep.exec();
     });
 
     it('can span a echo server', done => {
@@ -85,10 +75,8 @@ function readAssert(rxep: ExecEndpoint, done: any): void {
         [path.join('dist', 'test', 'echo-process.js')]);
 
       readAssert(eep, () => {
-        // console.log('complete my side');
         done();
       });
-      // eep.exec();
 
       [1, 2, 3, 4, 5, 6].forEach((el) => {
         eep.output.next(`${el}\n`);

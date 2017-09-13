@@ -10,7 +10,6 @@ export class Subject<T> {
     this.subscribes = [];
     this.completes = [];
     this.errors = [];
-    // console.log('iam urxjs');
   }
   public complete(): void {
     const cmplts = this.completes;
@@ -44,10 +43,3 @@ export class Observable<T> extends Subject<T> {
     return s;
   }
 }
-
-// const test = Observable.create(observer => {
-//   observer.next('Hello world!')
-// })
-// test.subscribe(data => {
-//   assert.equal(data == 'Hello world!')
-// })

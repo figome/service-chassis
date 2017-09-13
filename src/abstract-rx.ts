@@ -40,7 +40,5 @@ export class Observable<T> extends Subject<T> {
 }
 
 export function inject(modName: string = null): void {
-  /// impl = (global as any).abstractRx = require(modName || './urxjs');
-  // console.log('modname:', modName || './rxjs');
   impl = require(modName || './urxjs/urxjs');
 }
