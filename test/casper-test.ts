@@ -12,6 +12,8 @@ function createCasperJsExec(): RxEndpoint<string> {
         ['dist/test/casper-echo.js', `--http_server=${host_port}`]);
     eep.input.subscribe((data) => {
         // console.log('casper:', data);
+    }, (err) => {
+        console.error('createCasperJsExec', err);
     });
     const log: winston.LoggerInstance = new (winston.Logger)({
         transports: [new (winston.transports.Console)()]
@@ -23,7 +25,8 @@ function createCasperJsExec(): RxEndpoint<string> {
 
 ['rxjs', null].forEach(rxName => {
 
-    describe(`CasperJsEcho:${rxName}`, () => {
+    describe(`CasperJsEcho:${rxName}`, function(): void {
+        this.timeout(10000);
         before(done => {
             rx.inject(rxName);
             done();
@@ -50,13 +53,14 @@ function createCasperJsExec(): RxEndpoint<string> {
                     }
                     assert.equal(`CTS${count}`, data);
                     cje.output.next('/shutdown');
-                }, () => {
+                }, (err) => {
+                    console.log('error', err);
                     assert.fail();
                 }, () => {
-                    /* */
+                    // console.log('completed');
                 });
             }
-            loop(5);
+            loop(3);
         });
 
     });

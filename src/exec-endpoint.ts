@@ -38,6 +38,7 @@ export class ExecEndpoint implements RxEndpoint<string> {
         } else if (errorStack.length) {
           observer.error(errorStack);
         } else {
+          // console.log('completed process');
           observer.complete();
         }
       });
