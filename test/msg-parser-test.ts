@@ -2,13 +2,11 @@ import { assert } from 'chai';
 import ExecEndpoint from '../src/exec-endpoint';
 import FirstLastEndpoint from '../src/first-last-endpoint';
 import * as path from 'path';
-import * as rx from '../src/abstract-rx';
+import * as rx from 'rxjs';
 
-['rxjs', null].forEach(rxName => {
 
     describe('first-last messages', () => {
         before(done => {
-            rx.inject(rxName);
             done();
         });
 
@@ -58,4 +56,3 @@ import * as rx from '../src/abstract-rx';
 
     });
 
-});

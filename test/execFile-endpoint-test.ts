@@ -1,5 +1,5 @@
 import ExecFileEndpoint from '../src/execFile-endpoint';
-import * as rx from '../src/abstract-rx';
+import * as rx from 'rxjs';
 
 import { assert } from 'chai';
 import * as path from 'path';
@@ -26,11 +26,9 @@ function readAssert(rxep: ExecFileEndpoint, done: any): void {
   });
 }
 
-['rxjs', null].forEach(rxName => {
 
-  describe(`execFile plugin ${rxName}`, () => {
+  describe(`execFile plugin`, () => {
     before(done => {
-      rx.inject(rxName);
       done();
     });
 
@@ -86,4 +84,3 @@ function readAssert(rxep: ExecFileEndpoint, done: any): void {
 
   });
 
-});

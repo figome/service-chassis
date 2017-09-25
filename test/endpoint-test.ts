@@ -1,12 +1,10 @@
 import { assert } from 'chai';
 import MemoryEndpoint from '../src/memory-endpoint';
-import * as rx from '../src/abstract-rx';
+import * as rx from 'rxjs';
 
-['rxjs', null].forEach(rxName => {
 
-    describe(`Endpoint:${rxName}`, () => {
+    describe(`Endpoint:`, () => {
         before(done => {
-            rx.inject(rxName);
             done();
         });
 
@@ -55,4 +53,3 @@ import * as rx from '../src/abstract-rx';
 
         });
     });
-});

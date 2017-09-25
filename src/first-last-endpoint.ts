@@ -1,4 +1,4 @@
-import * as rx from './abstract-rx';
+import * as rx from 'rxjs';
 import PayloadParser from 'message-payload-parser';
 import RxEndpoint from './rx-endpoint';
 

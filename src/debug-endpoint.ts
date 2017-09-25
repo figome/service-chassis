@@ -1,4 +1,4 @@
-import * as rx from './abstract-rx';
+import * as rx from 'rxjs';
 
 export class DebugEndpoint extends rx.Subject<any> {
     private attached: rx.Subject<any>;

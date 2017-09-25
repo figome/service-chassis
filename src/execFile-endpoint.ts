@@ -1,4 +1,4 @@
-import * as rx from './abstract-rx';
+import * as rx from 'rxjs';
 import { execFile, ExecFileOptions, ChildProcess } from 'child_process';
 import RxEndpoint from './rx-endpoint';
 

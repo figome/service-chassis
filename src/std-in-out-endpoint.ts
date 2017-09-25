@@ -1,5 +1,5 @@
 
-import * as rx from './abstract-rx';
+import * as rx from 'rxjs';
 
 export class StdInOutEndpoint {
   public input: rx.Observable<string>;

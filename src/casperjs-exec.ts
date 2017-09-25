@@ -1,6 +1,6 @@
 
 import RxEndpoint from './rx-endpoint';
-import * as rx from './abstract-rx';
+import * as rx from 'rxjs';
 import * as request from 'request';
 import * as winston from 'winston';
 
