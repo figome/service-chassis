@@ -6,12 +6,13 @@ import FirstLastEndpoint from '../src/first-last-endpoint';
 import CasperJsExec from '../src/casperjs-exec';
 import * as winston from 'winston';
 
-function createCasperJsExec(): RxEndpoint<string> {
-    const host_port = '127.0.0.1:45678';
+function createCasperJsExec(count: number): RxEndpoint<string> {
+    console.log('createCasperJsExec:', count);
+    const host_port = `127.0.0.1:${45678 + count}`;
     const eep = ExecFileEndPoint.command('casperjs',
         ['dist/test/casper-echo.js', `--http_server=${host_port}`]);
     eep.input.subscribe((data) => {
-        // console.log('casper:', data);
+        console.log('casper:', data);
     }, (err) => {
         console.error('createCasperJsExec', err);
     });
@@ -24,37 +25,45 @@ function createCasperJsExec(): RxEndpoint<string> {
 }
 
 describe(`CasperJsEcho:`, function (): void {
-    this.timeout(10000);
+    this.timeout(30000);
     before(done => {
         done();
     });
 
     it('client to server', done => {
 
-        let cje = createCasperJsExec();
+        let cje = createCasperJsExec(3);
         function loop(count: number): void {
+            console.log('Loop', count);
+            let looped: number;
             cje.input.subscribe((data: any) => {
-                 console.log('....', data);
+                console.log('....', count, data);
                 if (data == '/started') {
-                    cje.output.next(`CTS${count}`);
+                    looped = 5;
+                    cje.output.next(`CTS${count}.${looped}`);
+                    return;
+                }
+                if (data == `CTS${count}.${looped}` && looped > 0) {
+                    cje.output.next(`CTS${count}.${--looped}`);
                     return;
                 }
                 if (data == '/shutdown') {
-                    if (count > 0) {
-                        cje = createCasperJsExec();
-                        loop(count - 1);
-                    } else {
-                        done();
-                    }
+                    console.log('received shutdown');
                     return;
                 }
-                assert.equal(`CTS${count}`, data);
+                console.log('send shutdown');
                 cje.output.next('/shutdown');
+                return;
             }, (err) => {
                 console.log('error', err);
                 assert.fail();
             }, () => {
                 console.log('completed');
+                if (count > 0) {
+                    cje = createCasperJsExec(--count);
+                } else if (count == 0) {
+                    done();
+                }
             });
         }
         loop(3);

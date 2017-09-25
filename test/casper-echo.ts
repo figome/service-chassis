@@ -8,6 +8,7 @@ import FirstLastEndpoint from '../src/first-last-endpoint';
 import CasperjsBinding from '../src/casperjs-binding';
 
 if (casper.cli.options.http_server) {
+  setTimeout(() => {
     const casperEp = new CasperjsBinding(casper.cli.options.http_server);
     console.log('started casperjs webserver');
     const flep = new FirstLastEndpoint('_mi8o_', '_mi8o_', casperEp);
@@ -18,4 +19,5 @@ if (casper.cli.options.http_server) {
         }
     });
     flep.output.next('/started');
+  }, 400);
 }
