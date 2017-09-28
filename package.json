@@ -14,7 +14,7 @@
   "scripts": {
     "clean": "rimraf dist",
     "prebuild": "npm run clean",
-    "build": "tsc && ./fix-casperjs.sh dist/test/casper-echo.js",
+    "build": "tsc && ./fix-casperjs.sh dist/test/helper/casper-echo.js",
     "build:watch": "tsc-watch server.ts --outDir ./dist --onSuccess 'node ./dist/server.ts'",
     "pretest": "npm run build",
     "lint": "tslint --project .",
