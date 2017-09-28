@@ -1,5 +1,5 @@
 import * as rx from 'rxjs';
-import StdInOutEndpoint from '../src/std-in-out-endpoint';
+import StdInOutEndpoint from '../../src/std-in-out-endpoint';
 
 
 const sioep = new StdInOutEndpoint();
