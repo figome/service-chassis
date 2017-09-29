@@ -1,11 +1,11 @@
 
 declare function require(name: string): any;
 
-const casper = require('casper').create();
-
 import * as rx from 'rxjs';
 import FirstLastEndpoint from '../../src/first-last-endpoint';
 import CasperjsBinding from '../../src/casperjs-binding';
+
+const casper = require('casper').create();
 
 if (casper.cli.options.http_server) {
     const casperEp = new CasperjsBinding(casper.cli.options.http_server);

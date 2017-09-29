@@ -11,6 +11,8 @@ export class FindLastEndpoint implements RxEndpoint<string> {
     constructor(first: string, last: string, down: RxEndpoint<string>) {
         this.payloadParser = new PayloadParser(first, last);
         this.output = new rx.Subject();
+        this.input = new rx.Subject();
+
         this.output.subscribe(
             (data) => {
                 down.output.next(`${this.payloadParser.first}${data}${this.payloadParser.last}`);
@@ -20,8 +22,9 @@ export class FindLastEndpoint implements RxEndpoint<string> {
             },
             () => {
                 down.output.complete();
-            });
-        this.input = new rx.Subject();
+            }
+        );
+
         down.input.subscribe(
             data => {
                 this.payloadParser.feed(data, 0, (payload) => {
@@ -33,7 +36,8 @@ export class FindLastEndpoint implements RxEndpoint<string> {
             },
             () => {
                 this.input.complete();
-            });
+            }
+        );
     }
 
 }
