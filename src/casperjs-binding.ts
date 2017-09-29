@@ -1,31 +1,34 @@
 import * as rx from 'rxjs';
 
+// const casper = require('casper');
+
 export class CasperjsBinding {
 
     public input: rx.Subject<string>;
     public output: rx.Subject<string>;
+    public listening: any;
 
     constructor(listenAdr: string) {
         this.input = new rx.Subject();
+        this.output = new rx.Subject();
+
+        // write "output" to stdout
+        this.output.subscribe(output => console.log(output));
+
         const server = require('webserver').create();
-        server.listen(listenAdr, (request: any, response: any) => {
+
+        this.listening = server.listen(listenAdr, (request: any, response: any) => {
+            // consume input via HTTP request
             try {
-            console.log('Listen-1', request.postRaw);
-            this.input.next(request.postRaw);
-            console.log('Listen-2');
+                this.input.next(request.postRaw);
             } catch (e) {
-                console.log('Listen-6:', e);
+                this.output.next('/error' + e);
             } finally {
-            response.statusCode = 200;
-            console.log('Listen-3');
-            response.write('<html><body>casper theater</body></html>');
-            console.log('Listen-4');
-            response.close();
-            console.log('Listen-5');
+                response.statusCode = 200;
+                response.write('<html><body>casper theater</body></html>');
+                response.close();
             }
         });
-        this.output = new rx.Subject();
-        this.output.subscribe((a) => console.log(a));
     }
 
 }

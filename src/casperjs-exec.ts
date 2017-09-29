@@ -9,7 +9,7 @@ export class CasperjsExec implements RxEndpoint<string> {
     public input: rx.Subject<string>;
     public output: rx.Subject<string>;
 
-    constructor(url: string, down: RxEndpoint<string>, log: winston.LoggerInstance = null) {
+    constructor(url: string, down: RxEndpoint<string>) {
         this.output = new rx.Subject();
         this.input = down.input;
         this.output.subscribe(
@@ -20,10 +20,11 @@ export class CasperjsExec implements RxEndpoint<string> {
                     body: data
                 }, (error, response, body) => {
                     if (error) {
-                        (log.error || console.error)('CasperExec:request:failed', url);
+                        console.error('CasperExec:request:failed', url);
                     }
                 });
-            });
+            }
+        );
     }
 
 }

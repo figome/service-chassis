@@ -7,11 +7,10 @@ export class ExecFileEndpoint implements RxEndpoint<string> {
     private file: string;
     private args: string[];
     private options: ExecFileOptions;
+    private subProcess: ChildProcess;
 
     public input: rx.Subject<string>;
     public output: rx.Subject<string>;
-
-    public subProcess: ChildProcess;
 
     public static command(file: string, args: string[] = [], options: ExecFileOptions = {}): ExecFileEndpoint {
         return new ExecFileEndpoint(file, args, options);
@@ -61,6 +60,10 @@ export class ExecFileEndpoint implements RxEndpoint<string> {
                 this.subProcess.stdin.end();
             }
         );
+    }
+
+    public kill(): void {
+        this.subProcess.kill();
     }
 
 }

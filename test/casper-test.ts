@@ -1,63 +1,77 @@
 import { assert } from 'chai';
 import * as rx from 'rxjs';
+import * as path from 'path';
+
 import RxEndpoint from '../src/rx-endpoint';
-import ExecFileEndPoint from '../src/execFile-endpoint';
+import ExecFileEndpoint from '../src/execFile-endpoint';
 import FirstLastEndpoint from '../src/first-last-endpoint';
 import CasperJsExec from '../src/casperjs-exec';
-import * as winston from 'winston';
 
-function createCasperJsExec(): RxEndpoint<string> {
-    const host_port = '127.0.0.1:45678';
-    const eep = ExecFileEndPoint.command('casperjs',
-        ['dist/test/casper-echo.js', `--http_server=${host_port}`]);
-    eep.input.subscribe((data) => {
-        // console.log('casper:', data);
-    }, (err) => {
-        console.error('createCasperJsExec', err);
+const casperEchoHelper = path.join('dist', 'test', 'helper',  'casper-echo.js');
+
+describe(`CasperJs echo:`, function (): void {
+
+    it('sends messages to casperjs process.', done => {
+
+        const host_port = '127.0.0.1:45678';
+        const eep = ExecFileEndpoint.command( 'casperjs', [ casperEchoHelper, `--http_server=${host_port}` ] );
+        const cjep = new CasperJsExec(`http://${host_port}/`, eep);
+        const flep = new FirstLastEndpoint('_mi8o_', '_mi8o_', cjep);
+
+        flep.input.subscribe(data => {
+            switch (data) {
+                case '/startedServer':
+                    flep.output.next('/shutdown');
+                    break;
+                case '/casperDone':
+                    eep.kill();
+                    done();
+                    break;
+                case '/failedToStartServer':
+                default:
+                    eep.kill();
+                    assert.fail();
+            }
+        });
+
     });
-    const log: winston.LoggerInstance = new (winston.Logger)({
-        transports: [new (winston.transports.Console)()]
-    });
 
-    const cjep = new CasperJsExec(`http://${host_port}/`, eep, log);
-    return new FirstLastEndpoint('_mi8o_', '_mi8o_', cjep);
-}
+    it('sends messages back and forth between node and casperjs.', done => {
 
-describe(`CasperJsEcho:`, function (): void {
-    this.timeout(10000);
-    before(done => {
-        done();
-    });
+        const host_port = '127.0.0.1:45678';
+        const eep = ExecFileEndpoint.command( 'casperjs', [ casperEchoHelper, `--http_server=${host_port}` ] );
+        const cjep = new CasperJsExec(`http://${host_port}/`, eep);
+        const flep = new FirstLastEndpoint('_mi8o_', '_mi8o_', cjep);
 
-    it('client to server', done => {
+        let count = 100;
 
-        let cje = createCasperJsExec();
-        function loop(count: number): void {
-            cje.input.subscribe((data: any) => {
-                 console.log('....', data);
-                if (data == '/started') {
-                    cje.output.next(`CTS${count}`);
-                    return;
-                }
-                if (data == '/shutdown') {
-                    if (count > 0) {
-                        cje = createCasperJsExec();
-                        loop(count - 1);
-                    } else {
-                        done();
-                    }
-                    return;
-                }
-                assert.equal(`CTS${count}`, data);
-                cje.output.next('/shutdown');
-            }, (err) => {
-                console.log('error', err);
-                assert.fail();
-            }, () => {
-                console.log('completed');
-            });
+        function loop(counter: number): void {
+            if (counter === 0) {
+                flep.output.next('/shutdown');
+                return;
+            }
+
+            flep.output.next(`PING${String(counter)}`);
         }
-        loop(3);
-    });
 
+        flep.input.subscribe(data => {
+            switch (data) {
+                case '/startedServer':
+                    loop(count);
+                    break;
+                case '/casperDone':
+                    eep.kill();
+                    done();
+                    break;
+                case '/failedToStartServer':
+                    eep.kill();
+                    assert.fail();
+                    break;
+                default:
+                    assert.equal(data, `PING${String(count)}`);
+                    loop(--count);
+            }
+        });
+
+    });
 });
