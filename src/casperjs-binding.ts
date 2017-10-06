@@ -1,6 +1,6 @@
 import * as rx from 'rxjs';
 
-// const casper = require('casper');
+const system = require('system');
 
 export class CasperjsBinding {
 
@@ -13,21 +13,24 @@ export class CasperjsBinding {
         this.output = new rx.Subject();
 
         // write "output" to stdout
-        this.output.subscribe(output => console.log(output));
+        this.output.subscribe(
+            data => {
+                console.log(data);
+            },
+            err => {
+                system.stderr.write(err);
+            }
+        );
 
         const server = require('webserver').create();
 
         this.listening = server.listen(listenAdr, (request: any, response: any) => {
             // consume input via HTTP request
-            try {
-                this.input.next(request.postRaw);
-            } catch (e) {
-                this.output.next('/error' + e);
-            } finally {
-                response.statusCode = 200;
-                response.write('<html><body>casper theater</body></html>');
-                response.close();
-            }
+            this.input.next(request.postRaw);
+
+            response.statusCode = 200;
+            response.write('<html><body>casper theater</body></html>');
+            response.close();
         });
     }
 
