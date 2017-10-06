@@ -2,7 +2,6 @@ import { assert } from 'chai';
 import ExecEndpoint from '../src/execFile-endpoint';
 import FirstLastEndpoint from '../src/first-last-endpoint';
 import * as path from 'path';
-import * as rx from 'rxjs';
 
 const echoProcessHelper = path.join('dist', 'test', 'helper', 'process-echo.js');
 

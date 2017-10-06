@@ -1,8 +1,6 @@
 import { assert } from 'chai';
-import * as rx from 'rxjs';
 import * as path from 'path';
 
-import RxEndpoint from '../src/rx-endpoint';
 import ExecFileEndpoint from '../src/execFile-endpoint';
 import FirstLastEndpoint from '../src/first-last-endpoint';
 import CasperJsExec from '../src/casperjs-exec';
@@ -36,10 +34,7 @@ describe('Endpoint casperJs', function (): void {
 
     it('can start and stop multiple casperJs processes.', function(done): void {
 
-        this.timeout(10000);
-
         let processPorts = [ '45678', '45679', '45680', '45681', '45682' ];
-        const noOfProcess = processPorts.length;
 
         function createCasperProcess(port: string, cb: (port: string) => void): void {
 

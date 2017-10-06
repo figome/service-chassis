@@ -1,4 +1,3 @@
-import * as rx from 'rxjs';
 import StdInOutEndpoint from '../../src/std-in-out-endpoint';
 
 const sioEp = new StdInOutEndpoint();

@@ -1,6 +1,5 @@
 import { assert } from 'chai';
 import MemoryEndpoint from '../src/memory-endpoint';
-import * as rx from 'rxjs';
 
 describe('Endpoint memory (communication)', () => {
 

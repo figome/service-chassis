@@ -1,5 +1,4 @@
 import ExecFileEndpoint from '../src/execFile-endpoint';
-import * as rx from 'rxjs';
 
 import { assert } from 'chai';
 import * as path from 'path';
