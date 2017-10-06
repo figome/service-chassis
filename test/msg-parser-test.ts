@@ -6,7 +6,7 @@ import * as rx from 'rxjs';
 
 const echoProcessHelper = path.join('dist', 'test', 'helper', 'process-echo.js');
 
-describe('first-last messages', () => {
+describe('Endpoint message parser', () => {
 
     it('echo test', done => {
 

@@ -13,7 +13,7 @@ export class CasperjsExec implements RxEndpoint<string> {
         this.output = new rx.Subject();
         this.input = down.input;
         this.output.subscribe(
-            (data) => {
+            data => {
                 request.put({
                     url: url,
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

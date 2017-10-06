@@ -34,7 +34,7 @@ function readAssert(rxep: ExecFileEndpoint, done: any): void {
     );
 }
 
-describe('execFile', () => {
+describe('Endpoint execFile', () => {
 
     it('can error', done => {
 

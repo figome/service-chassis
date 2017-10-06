@@ -14,11 +14,11 @@ export class FindLastEndpoint implements RxEndpoint<string> {
         this.input = new rx.Subject();
 
         this.output.subscribe(
-            (data) => {
+            data => {
                 down.output.next(`${this.payloadParser.first}${data}${this.payloadParser.last}`);
             },
-            (error) => {
-                down.output.error(error);
+            err => {
+                down.output.error(err);
             },
             () => {
                 down.output.complete();
@@ -31,8 +31,8 @@ export class FindLastEndpoint implements RxEndpoint<string> {
                     this.input.next(payload);
                 });
             },
-            (error) => {
-                this.input.error(error);
+            err => {
+                this.input.error(err);
             },
             () => {
                 this.input.complete();
