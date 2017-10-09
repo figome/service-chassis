@@ -36,11 +36,11 @@ describe('Endpoint message parser', () => {
         const flep = new FirstLastEndpoint('__BEG__', '__END__', eep);
 
         flep.input.subscribe(
-            (data) => {
+            data => {
                 assert.equal(`Hello World 0`, data);
             },
-            (error) => {
-                assert.equal(error[0].status, 66);
+            err => {
+                assert.equal(err.status, 66);
                 done();
             },
             () => {

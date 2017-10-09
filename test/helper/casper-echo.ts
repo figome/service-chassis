@@ -7,7 +7,7 @@ import CasperjsBinding from '../../src/casperjs-binding';
 const casper = require('casper').create();
 
 if (casper.cli.options.http_server) {
-    const casperEp = new CasperjsBinding(casper.cli.options.http_server);
+    const casperEp = new CasperjsBinding(casper.cli.options.http_server, casper);
     const flep = new FirstLastEndpoint('_mi8o_', '_mi8o_', casperEp);
 
     if (casperEp.listening) {
@@ -18,14 +18,11 @@ if (casper.cli.options.http_server) {
             data => {
                 switch (data) {
                     case '/shutdown':
-                        casper.exit();
-                        casper.bypass(1);
+                        flep.output.complete();
                         break;
                     case '/provokeEndpointError':
                         flep.output.error('/endpointError');
                         break;
-                    case '/provokeThrow':
-                        throw new Error('/provokedThrow');
                     default:
                         flep.output.next(data);
                 }
@@ -36,8 +33,6 @@ if (casper.cli.options.http_server) {
     } else {
 
         flep.output.error('/failedToStartServer');
-        casper.exit(1);
-        casper.bypass(1);
 
     }
 

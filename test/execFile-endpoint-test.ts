@@ -42,12 +42,11 @@ describe('Endpoint execFile', () => {
         eep.input.subscribe((data: any) => {
             assert.fail('never called');
         },
-        (error) => {
-            assert.equal((error[0] as any).code, 'ENOENT');
-            const status = (error[1] as any).status;
+        err => {
+            assert.equal((err.errors[0] as any).code, 'ENOENT');
             // node 6 return -2
             // node 0.10 return -1
-            assert.isTrue(status < 0);
+            assert.isTrue(err.status < 0);
             done();
         },
         () => {
@@ -60,16 +59,18 @@ describe('Endpoint execFile', () => {
 
         const eep = ExecFileEndpoint.command(process.execPath, ['-e', 'process.exit(47)']);
 
-        eep.input.subscribe((data: any) => {
-            assert.fail('never called');
-        },
-        (data) => {
-            assert.equal((data[0] as any).status, 47);
-            done();
-        },
-        () => {
-            assert.fail('never called');
-        });
+        eep.input.subscribe(
+            data => {
+                assert.fail('never called');
+            },
+            err => {
+                assert.equal(err.status, 47);
+                done();
+            },
+            () => {
+                assert.fail('never called');
+            }
+        );
 
     });
 

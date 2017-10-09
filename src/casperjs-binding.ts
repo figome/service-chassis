@@ -4,13 +4,15 @@ const system = require('system');
 
 export class CasperjsBinding {
 
+    private casper: any;
     public input: rx.Subject<string>;
     public output: rx.Subject<string>;
     public listening: any;
 
-    constructor(listenAdr: string) {
+    constructor(listenAdr: string, casper: any) {
         this.input = new rx.Subject();
         this.output = new rx.Subject();
+        this.casper = casper;
 
         // write "output" to stdout
         this.output.subscribe(
@@ -19,6 +21,12 @@ export class CasperjsBinding {
             },
             err => {
                 system.stderr.write(err);
+                this.casper.exit(1);
+                this.casper.bypass(1);
+            },
+            () => {
+                this.casper.exit();
+                this.casper.bypass(1);
             }
         );
 

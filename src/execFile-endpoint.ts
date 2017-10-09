@@ -8,7 +8,6 @@ export class ExecFileEndpoint implements RxEndpoint<string> {
     private args: string[];
     private options: ExecFileOptions;
     private subProcess: ChildProcess;
-    private errors: String;
 
     public input: rx.Subject<string>;
     public output: rx.Subject<string>;
@@ -28,7 +27,7 @@ export class ExecFileEndpoint implements RxEndpoint<string> {
             this.subProcess = execFile(this.file, this.args, this.options);
 
             this.subProcess.stdout.on('data', data => {
-                observer.next('' + data);
+                observer.next(String(data));
             });
 
             this.subProcess.stdout.on('error', (error: any) => {
@@ -36,19 +35,16 @@ export class ExecFileEndpoint implements RxEndpoint<string> {
             });
 
             this.subProcess.stderr.on('data', err => {
-                observer.error(err);
-                this.subProcess.kill();
+                errorStack.push(err);
             });
 
             this.subProcess.on('close', (status, signal) => {
-                if (!(status == 0)) {
-                    observer.error(errorStack.concat({
+                if (status !== 0) {
+                    observer.error({
                         status: status,
                         signal: signal,
-                        message: this.errors
-                    }));
-                } else if (errorStack.length) {
-                    observer.error(errorStack);
+                        errors: errorStack
+                    });
                 } else {
                     observer.complete();
                 }
