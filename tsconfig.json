@@ -12,6 +12,7 @@
   },
   "exclude": [
     "dist",
+    "typings",
     "node_modules"
   ]
 }

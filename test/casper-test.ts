@@ -74,7 +74,7 @@ describe('Endpoint casperJs', function (): void {
         processPorts.forEach( port => createCasperProcess(port, assertDone));
     });
 
-    it('can catch error if casper webserver fails to start.', done => {
+    it('can recognise errors in casper process (webserver failed to start).', done => {
         const host_port = 'XXXXXXX';
         const eep = ExecFileEndpoint.command( 'casperjs', [ casperEchoHelper, `--http_server=${host_port}` ] );
         const cjep = new CasperJsExec(`http://${host_port}/`, eep);
@@ -85,13 +85,13 @@ describe('Endpoint casperJs', function (): void {
                 assert.fail('I will never be called');
             },
             err => {
-                assert.deepEqual(err, '/failedToStartServer');
+                assert.deepEqual(err, { status: 1, signal: null, errors: [ '/failedToStartServer' ] });
                 done();
             }
         );
     });
 
-    it('can catch catch known exceptions during execution of the casperJs script.', done => {
+    it('can recognise errors in casper process (error during execution).', done => {
         const host_port = '127.0.0.1:45678';
         const eep = ExecFileEndpoint.command( 'casperjs', [ casperEchoHelper, `--http_server=${host_port}` ] );
         const cjep = new CasperJsExec(`http://${host_port}/`, eep);
@@ -107,7 +107,7 @@ describe('Endpoint casperJs', function (): void {
                 assert.fail('never called');
             },
             err => {
-                assert.deepEqual(err, '/endpointError');
+                assert.deepEqual(err, { status: 1, signal: null, errors: [ '/endpointError' ] });
                 done();
             }
         );
